@@ -1,0 +1,422 @@
+.my-posts-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1rem 0 2rem;
+}
+
+.my-posts-hero,
+.my-posts-attention-panel,
+.my-posts-controls,
+.my-posts-list-section {
+  margin-bottom: 1.25rem;
+}
+
+.my-posts-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--surface), var(--surface-soft));
+  box-shadow: var(--shadow-sm);
+}
+
+.my-posts-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.45rem;
+}
+
+.my-posts-hero h1,
+.section-heading-row h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.35rem;
+  color: var(--foreground);
+}
+
+.my-posts-hero p,
+.section-heading-row p,
+.my-posts-record-content p,
+.my-posts-attention-card p,
+.my-posts-empty-card p {
+  color: var(--foreground-muted);
+  margin: 0;
+  line-height: 1.55;
+}
+
+.my-posts-hero-actions,
+.my-posts-card-actions,
+.my-posts-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.my-posts-notice {
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.my-posts-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.my-posts-summary-grid .card-content {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.my-posts-summary-grid strong {
+  font-size: 1.65rem;
+  line-height: 1;
+  color: var(--foreground);
+}
+
+.my-posts-summary-grid span {
+  color: var(--foreground-muted);
+  font-size: 0.9rem;
+}
+
+.section-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.my-posts-attention-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.my-posts-attention-card h3 {
+  margin: 0.65rem 0 0.35rem;
+  color: var(--foreground);
+}
+
+.my-posts-card-topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.my-posts-card-actions {
+  justify-content: flex-start;
+  margin-top: 0.85rem;
+}
+
+.my-posts-controls {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.my-posts-search {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.my-posts-search input {
+  border: 0;
+  outline: 0;
+  width: 100%;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+}
+
+.my-posts-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.my-posts-filter-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--foreground-muted);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.my-posts-filter-tabs button.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.my-posts-filter-tabs button span {
+  display: inline-flex;
+  min-width: 1.35rem;
+  justify-content: center;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.my-posts-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.my-posts-record-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+}
+
+.my-posts-record-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary-color);
+}
+
+.my-posts-record-content h3 {
+  margin: 0.5rem 0 0.25rem;
+  color: var(--foreground);
+}
+
+.my-posts-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.9rem;
+  margin-top: 0.75rem;
+  color: var(--foreground-muted);
+  font-size: 0.9rem;
+}
+
+.my-posts-meta-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.my-posts-next-step {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  color: var(--foreground-muted);
+}
+
+.my-posts-next-step strong {
+  color: var(--foreground);
+}
+
+.my-posts-response-preview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 16px;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.my-posts-response-preview strong,
+.my-posts-response-preview span {
+  display: block;
+}
+
+.my-posts-response-preview span {
+  color: var(--foreground-muted);
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+.my-posts-response-preview p {
+  margin-top: 0.35rem;
+}
+
+.my-posts-record-actions {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 170px;
+}
+
+.my-posts-empty-card .card-content {
+  text-align: center;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+  padding: 2rem;
+}
+
+@media (max-width: 980px) {
+  .my-posts-hero,
+  .my-posts-controls,
+  .my-posts-record-main {
+    grid-template-columns: 1fr;
+  }
+
+  .my-posts-hero-actions,
+  .my-posts-filter-tabs,
+  .my-posts-record-actions {
+    justify-content: flex-start;
+  }
+
+  .my-posts-summary-grid,
+  .my-posts-attention-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-posts-record-actions {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .my-posts-page {
+    padding-top: 0.5rem;
+  }
+
+  .my-posts-hero,
+  .my-posts-attention-panel,
+  .my-posts-controls,
+  .my-posts-list-section {
+    margin-bottom: 1rem;
+  }
+
+  .my-posts-summary-grid,
+  .my-posts-attention-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .my-posts-response-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .my-posts-hero-actions,
+  .my-posts-empty-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .my-posts-hero-actions .btn,
+  .my-posts-empty-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Phase 6.6 full-width owner workspace polish */
+.my-posts-page {
+  width: 100%;
+  max-width: none;
+  display: grid;
+  gap: 1rem;
+}
+
+.my-posts-hero {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, auto);
+  padding: clamp(1.15rem, 2vw, 1.7rem);
+}
+
+.my-posts-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.my-posts-attention-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.my-posts-controls {
+  grid-template-columns: minmax(280px, 0.75fr) minmax(0, 1.25fr);
+}
+
+.my-posts-list {
+  grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
+  align-items: stretch;
+}
+
+.my-posts-record-card,
+.my-posts-record-card .card-content,
+.my-posts-record-main {
+  height: 100%;
+}
+
+.my-posts-record-main {
+  grid-template-columns: auto minmax(0, 1fr);
+  position: relative;
+}
+
+.my-posts-record-content {
+  min-width: 0;
+  padding-right: 0.25rem;
+}
+
+.my-posts-record-content h3,
+.my-posts-record-content p {
+  overflow-wrap: anywhere;
+}
+
+.my-posts-record-actions {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  min-width: 0;
+  margin-top: 0.9rem;
+}
+
+.my-posts-record-actions .btn {
+  width: auto;
+}
+
+.my-posts-response-preview {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.my-posts-response-preview .btn {
+  justify-self: start;
+}
+
+@media (max-width: 980px) {
+  .my-posts-list {
+    grid-template-columns: 1fr;
+  }
+
+  .my-posts-record-actions {
+    grid-column: 1 / -1;
+  }
+}

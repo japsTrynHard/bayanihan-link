@@ -1,0 +1,1954 @@
+.emergency-page {
+  background-color: var(--background-alt);
+  min-height: auto;
+}
+
+.emergency-main {
+  padding: var(--space-8) 0;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.emergency-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 38, 0.1) 0%,
+    rgba(220, 38, 38, 0.05) 100%
+  );
+  border: 2px solid rgba(220, 38, 38, 0.2);
+  border-radius: var(--radius-lg);
+}
+
+.header-content {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.alert-icon {
+  color: var(--danger);
+  flex-shrink: 0;
+}
+
+.header-content h1 {
+  color: var(--foreground);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.header-content p {
+  color: var(--foreground-muted);
+  margin: 0;
+}
+
+.emergencies-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.emerg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.emerg-time {
+  font-size: 0.875rem;
+  color: var(--foreground-muted);
+}
+
+.emerg-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.emerg-desc {
+  color: var(--foreground);
+  line-height: 1.6;
+  margin: 0 0 var(--space-4) 0;
+}
+
+.emerg-meta {
+  display: flex;
+  gap: var(--space-6);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-4);
+  font-size: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.emerg-meta span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--foreground-muted);
+}
+
+.emerg-meta svg {
+  color: var(--danger);
+}
+
+.emerg-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.emergency-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--foreground);
+}
+
+.form-group select,
+.form-group textarea {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--background);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-family: var(--font-sans);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+  .emergency-header {
+    flex-direction: column;
+  }
+
+  .emerg-meta {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .emerg-actions {
+    flex-direction: column;
+  }
+}
+
+.emergency-cover-image {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  display: block;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.view-mode-pillset {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.emergency-summary-grid,
+.emergency-admin-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.emergency-summary-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.emergency-summary-card svg {
+  color: var(--danger);
+  flex-shrink: 0;
+}
+
+.emergency-summary-card strong {
+  display: block;
+  font-size: 1.75rem;
+  line-height: 1;
+  color: var(--foreground);
+}
+
+.emergency-summary-card span {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--foreground-muted);
+  font-size: 0.875rem;
+}
+
+.emerg-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.right-align {
+  justify-content: flex-end;
+}
+
+.admin-response-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid rgba(30, 64, 175, 0.18);
+  border-radius: var(--radius);
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--foreground);
+}
+
+.admin-response-strip.compact {
+  margin-top: var(--space-3);
+}
+
+.admin-response-strip svg {
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.form-grid.two-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.locked-barangay-box {
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed rgba(30, 64, 175, 0.35);
+  border-radius: var(--radius);
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--foreground);
+}
+
+.emergency-detail-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.emergency-detail-image {
+  width: 100%;
+  max-height: 340px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.emergency-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.emergency-detail-grid > div {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-soft, var(--background-alt));
+}
+
+.emergency-detail-grid span {
+  display: block;
+  color: var(--foreground-muted);
+  font-size: 0.8rem;
+  margin-bottom: var(--space-1);
+}
+
+.emergency-detail-grid strong {
+  color: var(--foreground);
+}
+
+.emergency-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.emergency-timeline h4 {
+  margin: 0;
+  color: var(--foreground);
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+}
+
+.timeline-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.timeline-item strong {
+  color: var(--foreground);
+  font-size: 0.95rem;
+}
+
+.timeline-item span,
+.muted-text {
+  color: var(--foreground-muted);
+  font-size: 0.85rem;
+}
+
+.admin-emergency-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.admin-emergency-title h3 {
+  margin: 0;
+}
+
+.status-action-row {
+  align-items: center;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 900px) {
+  .emergency-summary-grid,
+  .emergency-admin-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .header-actions {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .view-mode-pillset {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-grid.two-columns,
+  .emergency-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .emerg-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Phase 2 smart emergency intelligence */
+.emergency-intel-strip {
+  border-color: rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.emergency-intel-strip.warning {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+/* Emergency location privacy and response workflow polish */
+.emergency-header-streamlined {
+  align-items: center;
+}
+
+.emergency-privacy-note,
+.emergency-fast-tip,
+.emergency-submit-note,
+.form-alert,
+.location-confidence {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  border: 1px solid rgba(30, 64, 175, 0.18);
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--foreground);
+  line-height: 1.5;
+}
+
+.form-alert {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.form-alert a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.form-alert.danger {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.emergency-fast-tip,
+.emergency-submit-note {
+  border-color: rgba(245, 158, 11, 0.28);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.emergency-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+
+.emergency-section-heading h2 {
+  margin: 0 0 var(--space-1) 0;
+  color: var(--foreground);
+}
+
+.emergency-section-heading p {
+  margin: 0;
+  color: var(--foreground-muted);
+}
+
+.emergency-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-2);
+}
+
+.emergency-type-button {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--foreground);
+  padding: var(--space-3);
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.emergency-type-button:hover,
+.emergency-type-button.active {
+  border-color: rgba(220, 38, 38, 0.55);
+  background: rgba(220, 38, 38, 0.08);
+  transform: translateY(-1px);
+}
+
+.emergency-location-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+}
+
+.emergency-location-panel strong {
+  color: var(--foreground);
+}
+
+.emergency-location-panel p {
+  margin: var(--space-1) 0 0;
+  color: var(--foreground-muted);
+}
+
+.optional-label {
+  color: var(--foreground-muted);
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.emergency-admin-guide {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.emergency-admin-guide h3,
+.admin-map-header h4 {
+  margin: 0 0 var(--space-1) 0;
+  color: var(--foreground);
+}
+
+.emergency-admin-guide p,
+.admin-map-header p,
+.admin-emergency-desc {
+  margin: 0;
+  color: var(--foreground-muted);
+  line-height: 1.5;
+}
+
+.emergency-guide-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.emergency-guide-list span {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--foreground);
+  line-height: 1.4;
+}
+
+.emergency-admin-card-row {
+  align-items: flex-start;
+}
+
+.emergency-admin-meta {
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.location-confidence {
+  margin-bottom: var(--space-3);
+  font-size: 0.9rem;
+}
+
+.location-confidence.good {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.location-confidence.fair {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.location-confidence.weak {
+  border-color: rgba(220, 38, 38, 0.3);
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.emergency-admin-actions {
+  flex-wrap: wrap;
+}
+
+.admin-map-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+}
+
+.admin-map-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.admin-osm-map,
+.map-fallback-box {
+  width: 100%;
+  min-height: 320px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background-alt);
+}
+
+.admin-osm-map {
+  display: block;
+}
+
+.map-fallback-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  color: var(--foreground-muted);
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .emergency-type-grid,
+  .emergency-admin-guide {
+    grid-template-columns: 1fr;
+  }
+
+  .emergency-location-panel,
+  .admin-map-header,
+  .emergency-section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .emergency-role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .emergency-location-choice-grid,
+  .emergency-page .two-column-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-alert {
+    flex-direction: column;
+  }
+
+  .admin-osm-map,
+  .map-fallback-box {
+    min-height: 240px;
+  }
+}
+
+/* Phase 7.1 emergency response/contact/service-area upgrade */
+.emergency-role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.emergency-role-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-height: 124px;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.emergency-role-button:hover,
+.emergency-role-button.active {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
+}
+
+.emergency-role-button svg {
+  color: var(--danger);
+}
+
+.emergency-role-button span {
+  color: var(--foreground-muted);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.form-alert.warning {
+  border-color: rgba(245, 158, 11, 0.32);
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning-text, #92400e);
+}
+
+.form-alert.success {
+  border-color: rgba(34, 197, 94, 0.32);
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success, #15803d);
+}
+
+.form-alert a {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-weight: 700;
+}
+
+.warning-strip {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.emergency-card-outside {
+  border: 1px solid rgba(220, 38, 38, 0.28);
+}
+
+.emergency-contact-panel {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+}
+
+.emergency-contact-panel h4 {
+  margin: 0 0 var(--space-3);
+}
+
+.emergency-contact-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.emergency-contact-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-soft-2);
+}
+
+.emergency-contact-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.emergency-contact-card span,
+.emergency-contact-card small {
+  color: var(--foreground-muted);
+}
+
+.empty-state span {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--foreground-muted);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 768px) {
+  .emergency-role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .emergency-contact-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+/* Phase 7.2 confirmation and resident review polish */
+.success-strip {
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.success-strip svg {
+  color: var(--success, #15803d);
+}
+
+.emergency-moderation-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  border-radius: var(--radius-lg);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.emergency-moderation-panel h4 {
+  margin: 0 0 var(--space-1);
+  color: var(--foreground);
+}
+
+.emergency-moderation-panel p {
+  margin: 0;
+  color: var(--foreground-muted);
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .emergency-moderation-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+/* Phase 7.3 admin emergency layout cleanup */
+.emergency-report-list {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.emergency-report-card .card-content,
+.emergency-report-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(240px, 0.8fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.emergency-report-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.emergency-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.emergency-report-badges {
+  justify-content: flex-end;
+  max-width: 320px;
+}
+
+.emergency-facts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.emergency-fact-card,
+.emergency-insight-card,
+.emergency-side-panel {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.emergency-fact-label,
+.emergency-side-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--foreground-muted);
+}
+
+.emergency-fact-card strong {
+  color: var(--foreground);
+  line-height: 1.45;
+}
+
+.emergency-insight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.emergency-insight-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: 0;
+}
+
+.emergency-insight-card strong {
+  color: var(--foreground);
+}
+
+.emergency-pin-card {
+  border-color: rgba(30, 64, 175, 0.18);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.emergency-note-box {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.emergency-report-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.emergency-side-actions,
+.emergency-side-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.emergency-side-actions .btn,
+.emergency-side-links .btn,
+.emergency-side-actions button,
+.emergency-side-links button {
+  width: 100%;
+  justify-content: center;
+}
+
+.emergency-detail-overview {
+  margin-top: var(--space-1);
+}
+
+.emergency-detail-section {
+  box-shadow: none;
+}
+
+.status-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.status-action-row .btn,
+.status-action-row button {
+  min-width: 140px;
+}
+
+@media (max-width: 1100px) {
+  .emergency-report-card .card-content,
+  .emergency-report-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .emergency-report-badges {
+    justify-content: flex-start;
+    max-width: none;
+  }
+
+  .emergency-side-actions,
+  .emergency-side-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .emergency-report-header,
+  .emergency-facts-grid,
+  .emergency-insight-grid,
+  .emergency-side-actions,
+  .emergency-side-links {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .emergency-side-actions,
+  .emergency-side-links {
+    display: flex;
+  }
+
+  .emergency-report-card .card-content,
+  .emergency-report-shell {
+    gap: var(--space-4);
+  }
+}
+
+/* Phase 7.5 admin emergency redesign */
+.emergency-record-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.emergency-record-toolbar h3 {
+  margin: 0 0 var(--space-1);
+  color: var(--foreground);
+}
+
+.emergency-record-toolbar p {
+  margin: 0;
+  color: var(--foreground-muted);
+}
+
+.emergency-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.emergency-filter-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.7rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.emergency-filter-chip span {
+  font-size: 0.9rem;
+}
+
+.emergency-filter-chip strong {
+  display: inline-flex;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.82rem;
+}
+
+.emergency-filter-chip:hover,
+.emergency-filter-chip.active {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.12);
+  transform: translateY(-1px);
+}
+
+.emergency-report-list {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.emergency-record-card .card-content,
+.emergency-record-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(250px, 0.8fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.emergency-record-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.emergency-record-header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.emergency-record-title-block {
+  min-width: 0;
+}
+
+.emergency-record-status-group {
+  justify-content: flex-end;
+  max-width: 300px;
+}
+
+.emergency-record-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.emergency-record-meta-line span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--foreground-muted);
+  font-size: 0.9rem;
+}
+
+.emergency-record-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.emergency-record-item {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.emergency-record-item.wide {
+  grid-column: span 2;
+}
+
+.emergency-record-item span {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--foreground-muted);
+}
+
+.emergency-record-item strong {
+  color: var(--foreground);
+  line-height: 1.45;
+}
+
+.emergency-record-insights {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.emergency-record-insight,
+.emergency-record-note {
+  margin: 0;
+}
+
+.emergency-record-actions-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.emergency-actions-box {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.emergency-actions-box.subtle {
+  background: transparent;
+}
+
+.emergency-panel-label {
+  display: block;
+  margin-bottom: var(--space-3);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+}
+
+.emergency-panel-actions,
+.emergency-panel-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.emergency-panel-actions .btn,
+.emergency-panel-links .btn,
+.emergency-panel-actions button,
+.emergency-panel-links button {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 1200px) {
+  .emergency-record-card .card-content,
+  .emergency-record-layout,
+  .emergency-record-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .emergency-record-toolbar {
+    display: grid;
+  }
+
+  .emergency-filter-row {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .emergency-record-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .emergency-record-item.wide {
+    grid-column: span 2;
+  }
+
+  .emergency-record-status-group {
+    justify-content: flex-start;
+    max-width: none;
+  }
+
+  .emergency-record-header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .emergency-record-grid,
+  .emergency-filter-row {
+    grid-template-columns: 1fr;
+  }
+
+  .emergency-record-item.wide {
+    grid-column: span 1;
+  }
+
+  .emergency-record-meta-line,
+  .emergency-filter-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .emergency-filter-chip {
+    justify-content: space-between;
+  }
+}
+
+/* Phase 7.6 strict admin emergency UI cleanup
+   Scoped to admin emergency page only, so resident emergency UI and other pages stay unchanged. */
+.admin-emergency-page {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.9rem, 1vw, 1.25rem);
+}
+
+.admin-emergency-page .card {
+  overflow: hidden;
+}
+
+.admin-emergency-page .emergency-admin-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr)) !important;
+  gap: clamp(0.75rem, 1vw, 1rem);
+}
+
+.admin-emergency-page .emergency-summary-card {
+  min-height: 96px;
+  align-items: center;
+  padding: 0.25rem;
+}
+
+.admin-emergency-page .emergency-summary-card svg {
+  width: 42px;
+  height: 42px;
+  padding: 0.7rem;
+  border-radius: 18px;
+  background: var(--surface-soft);
+}
+
+.admin-emergency-page .emergency-summary-card--review svg {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.admin-emergency-page .emergency-summary-card--active svg,
+.admin-emergency-page .emergency-summary-card--location svg {
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.admin-emergency-page .emergency-summary-card--resolved svg {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.admin-emergency-page .emergency-summary-card strong {
+  font-size: clamp(1.55rem, 2vw, 2.1rem);
+}
+
+.admin-emergency-page .emergency-summary-card span {
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.admin-emergency-page .emergency-admin-guide {
+  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.3fr);
+  gap: clamp(1rem, 1.6vw, 1.5rem);
+  align-items: stretch;
+}
+
+.admin-emergency-page .emergency-admin-guide > div:first-child {
+  padding-right: clamp(0rem, 1vw, 1rem);
+  border-right: 1px solid var(--border);
+}
+
+.admin-emergency-page .emergency-guide-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(230px, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-emergency-page .emergency-guide-step {
+  min-width: 0;
+  min-height: 54px;
+  padding: 0.72rem 0.82rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.admin-emergency-page .emergency-guide-step .badge {
+  flex: 0 0 auto;
+}
+
+.admin-emergency-page .emergency-record-toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-emergency-page .emergency-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.admin-emergency-page .emergency-filter-chip {
+  min-height: 42px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 14px;
+  white-space: nowrap;
+}
+
+.admin-emergency-page .emergency-report-list {
+  gap: 1rem;
+}
+
+.admin-emergency-page .emergency-record-card {
+  border-radius: 24px;
+}
+
+.admin-emergency-page .emergency-record-card .card-content,
+.admin-emergency-page .emergency-record-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
+  gap: clamp(1rem, 1.35vw, 1.35rem);
+  align-items: stretch;
+}
+
+.admin-emergency-page .emergency-record-content,
+.admin-emergency-page .emergency-record-title-block,
+.admin-emergency-page .emergency-record-actions-panel {
+  min-width: 0;
+}
+
+.admin-emergency-page .emergency-record-content {
+  gap: 1rem;
+}
+
+.admin-emergency-page .emergency-record-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 330px);
+  gap: 1rem;
+  padding-bottom: 1rem;
+  align-items: start;
+}
+
+.admin-emergency-page .admin-emergency-title {
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+}
+
+.admin-emergency-page .admin-emergency-title svg {
+  flex: 0 0 auto;
+  color: var(--danger);
+}
+
+.admin-emergency-page .admin-emergency-title h3 {
+  font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.admin-emergency-page .admin-emergency-desc,
+.admin-emergency-page .emergency-record-meta-line span,
+.admin-emergency-page .emergency-record-item strong,
+.admin-emergency-page .emergency-record-insight span,
+.admin-emergency-page .emergency-record-note span {
+  overflow-wrap: anywhere;
+}
+
+.admin-emergency-page .admin-emergency-desc {
+  max-width: 78ch;
+  line-height: 1.55;
+}
+
+.admin-emergency-page .emergency-record-meta-line {
+  gap: 0.55rem 1rem;
+}
+
+.admin-emergency-page .emergency-record-meta-line span {
+  min-height: 28px;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.admin-emergency-page .emergency-record-status-group {
+  justify-content: flex-end;
+  align-content: flex-start;
+  max-width: none;
+}
+
+.admin-emergency-page .emergency-record-status-group .badge {
+  max-width: 100%;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.admin-emergency-page .emergency-record-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(190px, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-emergency-page .emergency-record-item,
+.admin-emergency-page .emergency-actions-box {
+  border-radius: 18px;
+  background: var(--surface-soft-2);
+}
+
+.admin-emergency-page .emergency-record-item {
+  min-height: 92px;
+  padding: 1rem;
+}
+
+.admin-emergency-page .emergency-record-item.wide {
+  grid-column: auto;
+}
+
+.admin-emergency-page .emergency-record-item span,
+.admin-emergency-page .emergency-panel-label {
+  letter-spacing: 0.02em;
+}
+
+.admin-emergency-page .emergency-record-item strong {
+  display: block;
+  font-size: 0.98rem;
+}
+
+.admin-emergency-page .emergency-record-insights {
+  gap: 0.75rem;
+}
+
+.admin-emergency-page .emergency-record-insight,
+.admin-emergency-page .emergency-record-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+}
+
+.admin-emergency-page .emergency-record-insight svg,
+.admin-emergency-page .emergency-record-note svg {
+  flex: 0 0 auto;
+  margin-top: 0.08rem;
+}
+
+.admin-emergency-page .emergency-record-actions-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+}
+
+.admin-emergency-page .emergency-actions-box {
+  padding: 1rem;
+}
+
+.admin-emergency-page .emergency-actions-box.subtle {
+  background: transparent;
+}
+
+.admin-emergency-page .emergency-panel-label {
+  margin-bottom: 0.75rem;
+  font-size: 0.76rem;
+}
+
+.admin-emergency-page .emergency-panel-actions,
+.admin-emergency-page .emergency-panel-links {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+
+.admin-emergency-page .emergency-panel-actions .btn,
+.admin-emergency-page .emergency-panel-links .btn,
+.admin-emergency-page .emergency-panel-actions button,
+.admin-emergency-page .emergency-panel-links button {
+  width: 100%;
+  min-height: 40px;
+  justify-content: center;
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.admin-emergency-page .empty-state {
+  padding: 1rem;
+}
+
+.admin-emergency-page .emergency-detail-modal {
+  min-width: 0;
+}
+
+.admin-emergency-page .emergency-detail-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.admin-emergency-page .status-action-row {
+  align-items: stretch;
+}
+
+.admin-emergency-page .status-action-row .btn,
+.admin-emergency-page .status-action-row button {
+  min-width: 132px;
+  white-space: normal;
+}
+
+@media (max-width: 1500px) {
+  .admin-emergency-page .emergency-record-card .card-content,
+  .admin-emergency-page .emergency-record-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+  }
+
+  .admin-emergency-page .emergency-record-header {
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 300px);
+  }
+
+  .admin-emergency-page .emergency-record-grid {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 1320px) {
+  .admin-emergency-page .emergency-record-card .card-content,
+  .admin-emergency-page .emergency-record-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-emergency-page .emergency-record-actions-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1120px) {
+  .admin-emergency-page .emergency-admin-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .admin-emergency-page .emergency-admin-guide {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-emergency-page .emergency-admin-guide > div:first-child {
+    padding-right: 0;
+    padding-bottom: 1rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .admin-emergency-page .emergency-record-toolbar {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .admin-emergency-page .emergency-filter-row {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-emergency-page .emergency-guide-list,
+  .admin-emergency-page .emergency-record-grid,
+  .admin-emergency-page .emergency-record-actions-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-emergency-page .emergency-record-header {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-emergency-page .emergency-record-status-group {
+    justify-content: flex-start;
+  }
+
+  .admin-emergency-page .emergency-panel-actions,
+  .admin-emergency-page .emergency-panel-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-emergency-page {
+    gap: 0.85rem;
+  }
+
+  .admin-emergency-page .emergency-admin-summary {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-emergency-page .emergency-summary-card {
+    min-height: 82px;
+  }
+
+  .admin-emergency-page .emergency-filter-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-emergency-page .emergency-filter-chip {
+    width: 100%;
+  }
+
+  .admin-emergency-page .emergency-record-meta-line {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-emergency-page .emergency-record-meta-line span {
+    border-radius: 14px;
+  }
+
+  .admin-emergency-page .emergency-panel-actions,
+  .admin-emergency-page .emergency-panel-links,
+  .admin-emergency-page .status-action-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-emergency-page .emergency-record-item,
+  .admin-emergency-page .emergency-actions-box,
+  .admin-emergency-page .emergency-guide-step {
+    border-radius: 16px;
+  }
+}
+
+/* Phase 7.13 admin emergency detail modal spacing polish */
+.admin-emergency-page .emergency-detail-modal {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.admin-emergency-page .emerg-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.admin-emergency-page .emergency-detail-modal > p {
+  margin: 0;
+  padding: 0.95rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: var(--surface-soft);
+  color: var(--foreground-muted);
+}
+
+.admin-emergency-page .emergency-detail-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 0;
+}
+
+.admin-emergency-page .emergency-detail-grid > div,
+.admin-emergency-page .emergency-detail-section,
+.admin-emergency-page .emergency-moderation-panel,
+.admin-emergency-page .admin-map-panel {
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: var(--surface-soft);
+}
+
+.admin-emergency-page .emergency-detail-grid span,
+.admin-emergency-page .emergency-detail-grid strong {
+  display: block;
+  line-height: 1.45;
+}
+
+.admin-emergency-page .emergency-detail-grid strong {
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-emergency-page .admin-map-header,
+.admin-emergency-page .inline-actions.status-action-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-emergency-page .inline-actions.status-action-row {
+  justify-content: flex-start;
+  padding: 0.9rem;
+  border-radius: 18px;
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.admin-emergency-page .inline-actions.status-action-row .btn,
+.admin-emergency-page .inline-actions.status-action-row button {
+  min-width: 150px;
+}
+
+@media (max-width: 760px) {
+  .admin-emergency-page .emergency-detail-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-emergency-page .inline-actions.status-action-row .btn,
+  .admin-emergency-page .inline-actions.status-action-row button {
+    width: 100%;
+  }
+}
+
+/* Phase 9.3 private cross-barangay emergency workflow */
+.emergency-location-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.emergency-location-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-height: 96px;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.emergency-location-choice:hover,
+.emergency-location-choice.active {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
+}
+
+.emergency-location-choice span {
+  color: var(--foreground-muted);
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.locked-barangay-box span {
+  display: inline-block;
+  margin-left: 0.4rem;
+  color: var(--foreground-muted);
+}
+
+.support-role-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 14px;
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--foreground);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.support-role-note svg {
+  color: var(--warning, #d97706);
+  flex: 0 0 auto;
+  margin-top: 0.05rem;
+}
+
+.emergency-page .two-column-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+@media (max-width: 768px) {
+  .emergency-location-choice-grid,
+  .emergency-page .two-column-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .locked-barangay-box span {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.3rem;
+  }
+}
+
+/* Phase 7.1 hotfix: admin emergency modal must fit the viewport even with large evidence photos. */
+.admin-emergency-detail-modal-shell {
+  width: min(94vw, 76rem) !important;
+  max-height: min(88vh, 820px) !important;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-emergency-detail-modal-shell .modal-header {
+  flex: 0 0 auto;
+  padding: clamp(0.95rem, 1.4vw, 1.25rem) clamp(1rem, 1.8vw, 1.45rem);
+}
+
+.admin-emergency-detail-modal-content {
+  min-height: 0;
+  overflow-y: auto;
+  padding: clamp(0.9rem, 1.5vw, 1.25rem) clamp(1rem, 1.8vw, 1.45rem) 1.35rem;
+  gap: 0.9rem;
+  scrollbar-gutter: stable;
+}
+
+.admin-emergency-detail-modal-content .emergency-detail-modal {
+  gap: 0.85rem;
+}
+
+.admin-emergency-detail-modal-content
+  .smart-media-trigger.emergency-detail-image {
+  max-height: clamp(170px, 28vh, 300px) !important;
+  overflow: hidden !important;
+  border-radius: 18px;
+}
+
+.admin-emergency-detail-modal-content
+  .smart-media-trigger.emergency-detail-image
+  .smart-media-frame--detail {
+  height: clamp(170px, 28vh, 300px) !important;
+  max-height: clamp(170px, 28vh, 300px) !important;
+  aspect-ratio: auto !important;
+  border-radius: 18px;
+}
+
+.admin-emergency-detail-modal-content
+  .smart-media-trigger.emergency-detail-image
+  .smart-media-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.admin-emergency-detail-modal-content .emerg-badge-row {
+  gap: 0.45rem;
+}
+
+.admin-emergency-detail-modal-content .emergency-detail-overview {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-emergency-detail-modal-content .emergency-detail-grid > div {
+  padding: 0.85rem 0.9rem;
+  min-width: 0;
+}
+
+.admin-emergency-detail-modal-content .emergency-detail-grid span {
+  font-size: 0.76rem;
+}
+
+.admin-emergency-detail-modal-content .emergency-detail-grid strong {
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-emergency-detail-modal-content .emergency-moderation-panel,
+.admin-emergency-detail-modal-content .emergency-detail-section,
+.admin-emergency-detail-modal-content .admin-map-panel,
+.admin-emergency-detail-modal-content .emergency-timeline {
+  padding: 0.95rem;
+}
+
+.admin-emergency-detail-modal-content .admin-osm-map {
+  max-height: 260px;
+}
+
+.admin-emergency-detail-modal-content .inline-actions.status-action-row {
+  position: sticky;
+  bottom: -1px;
+  z-index: 2;
+  margin-top: 0.25rem;
+  backdrop-filter: blur(12px);
+}
+
+@media (max-width: 760px) {
+  .admin-emergency-detail-modal-shell {
+    width: 100% !important;
+    max-height: 92vh !important;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .admin-emergency-detail-modal-content
+    .smart-media-trigger.emergency-detail-image,
+  .admin-emergency-detail-modal-content
+    .smart-media-trigger.emergency-detail-image
+    .smart-media-frame--detail {
+    height: clamp(150px, 34vh, 240px) !important;
+    max-height: clamp(150px, 34vh, 240px) !important;
+  }
+
+  .admin-emergency-detail-modal-content .emergency-detail-overview {
+    grid-template-columns: 1fr;
+  }
+}

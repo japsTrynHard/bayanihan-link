@@ -1,0 +1,1179 @@
+/* BAYANIHAN LINK - Professional Design System */
+:root {
+  /* Colors */
+  --primary: #1E40AF;
+  --primary-light: #3B82F6;
+  --primary-dark: #1E3A8A;
+  --secondary: #F8FAFC;
+  --secondary-light: #E2E8F0;
+  --accent: #0EA5E9;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #DC2626;
+  --danger-light: #FEE2E2;
+
+  --foreground: #111827;
+  --foreground-muted: #6B7280;
+  --background: #FFFFFF;
+  --background-alt: #F9FAFB;
+  --border: #E5E7EB;
+  --border-light: #F3F4F6;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --surface-panel: rgba(255, 255, 255, 0.92);
+  --surface-soft: #EEF4FF;
+  --surface-soft-2: #F8FBFF;
+  --focus-ring: rgba(59, 130, 246, 0.18);
+  --success-soft: rgba(16, 185, 129, 0.12);
+  --warning-soft: rgba(245, 158, 11, 0.12);
+  --danger-soft: rgba(220, 38, 38, 0.12);
+  --danger-text: #991B1B;
+  --warning-text: #92400E;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  --font-mono: 'SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo', monospace;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Radius */
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Transitions */
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.light {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+  --primary: #60A5FA;
+  --primary-light: #93C5FD;
+  --primary-dark: #3B82F6;
+  --secondary: #111827;
+  --secondary-light: #1F2937;
+  --accent: #38BDF8;
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --danger-light: rgba(248, 113, 113, 0.16);
+  --foreground: #F8FAFC;
+  --foreground-muted: #CBD5E1;
+  --background: #0B1220;
+  --background-alt: #020617;
+  --border: #243244;
+  --border-light: #334155;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.35), 0 1px 2px -1px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 18px 36px -12px rgb(0 0 0 / 0.5);
+  --surface-panel: rgba(15, 23, 42, 0.92);
+  --surface-soft: #0F1A2D;
+  --surface-soft-2: #131F35;
+  --focus-ring: rgba(96, 165, 250, 0.22);
+  --success-soft: rgba(52, 211, 153, 0.18);
+  --warning-soft: rgba(251, 191, 36, 0.18);
+  --danger-soft: rgba(248, 113, 113, 0.18);
+  --danger-text: #FECACA;
+  --warning-text: #FDE68A;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  background-color: var(--background);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--background-alt);
+  caret-color: transparent;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+#root * {
+  cursor: default;
+  caret-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#root input,
+#root textarea,
+#root select,
+#root option,
+#root [contenteditable="true"],
+#root .input,
+#root .message-input,
+#root .upload-zone input {
+  caret-color: var(--foreground) !important;
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+button,
+a,
+[role="button"],
+.dashboard-nav__link,
+.conversation-item,
+.header-icon-btn,
+.demo-account-card {
+  cursor: pointer;
+  user-select: none;
+}
+
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+/* Typography */
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: var(--space-4);
+}
+
+h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin-bottom: var(--space-4);
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  margin-bottom: var(--space-3);
+}
+
+h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+h5 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+p {
+  color: var(--foreground);
+  margin-bottom: var(--space-4);
+  line-height: 1.6;
+}
+
+small {
+  font-size: 0.875rem;
+  color: var(--foreground-muted);
+}
+
+/* Form Elements */
+input, textarea, select {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--foreground);
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  transition: var(--transition);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+textarea {
+  resize: vertical;
+  font-family: var(--font-sans);
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+/* Utility Classes */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: var(--space-2);
+}
+
+.gap-3 {
+  gap: var(--space-3);
+}
+
+.gap-4 {
+  gap: var(--space-4);
+}
+
+.gap-6 {
+  gap: var(--space-6);
+}
+
+.gap-8 {
+  gap: var(--space-8);
+}
+
+.p-4 {
+  padding: var(--space-4);
+}
+
+.p-6 {
+  padding: var(--space-6);
+}
+
+.px-4 {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+.py-4 {
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+.mb-2 {
+  margin-bottom: var(--space-2);
+}
+
+.mb-3 {
+  margin-bottom: var(--space-3);
+}
+
+.mb-4 {
+  margin-bottom: var(--space-4);
+}
+
+.mb-6 {
+  margin-bottom: var(--space-6);
+}
+
+.mb-8 {
+  margin-bottom: var(--space-8);
+}
+
+.mt-2 {
+  margin-top: var(--space-2);
+}
+
+.mt-3 {
+  margin-top: var(--space-3);
+}
+
+.mt-4 {
+  margin-top: var(--space-4);
+}
+
+.mt-6 {
+  margin-top: var(--space-6);
+}
+
+.mt-8 {
+  margin-top: var(--space-8);
+}
+
+.w-full {
+  width: 100%;
+}
+
+.rounded {
+  border-radius: var(--radius);
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.shadow {
+  box-shadow: var(--shadow);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-base {
+  font-size: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-muted {
+  color: var(--foreground-muted);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.border {
+  border: 1px solid var(--border);
+}
+
+.border-t {
+  border-top: 1px solid var(--border);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.875rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+
+html.dark .note-box,
+html.dark .data-table th,
+html.dark .data-table td,
+html.dark .settings-card,
+html.dark .detail-card,
+html.dark .conversations-list,
+html.dark .chat-window,
+html.dark .list-header,
+html.dark .card,
+html.dark .modal,
+html.dark .filter-btn,
+html.dark .demo-account-card,
+html.dark .auth-card {
+  color: var(--foreground);
+}
+
+html.dark .note-box {
+  background: var(--surface-soft);
+}
+
+html.dark .filter-btn.active,
+html.dark .conversation-item.active,
+html.dark .notif-item-link .card.unread {
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.12);
+}
+
+html.dark .message.received .message-content {
+  background: var(--surface-soft);
+}
+
+html.dark .image-count,
+html.dark .image-overlay,
+html.dark .remove-image-btn {
+  color: white;
+}
+
+/* Phase 12 UI/UX Final Polish */
+:root {
+  --app-max-width: 1360px;
+  --page-gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.22);
+  color: var(--foreground);
+}
+
+#root a,
+#root button,
+#root [role="button"],
+#root .card-hoverable,
+#root .dashboard-list-item,
+#root .quick-action-card,
+#root .theme-option-card,
+#root .notif-toggle,
+#root .conversation-item {
+  caret-color: transparent !important;
+  cursor: pointer !important;
+}
+
+#root button:focus-visible,
+#root a:focus-visible,
+#root input:focus-visible,
+#root textarea:focus-visible,
+#root select:focus-visible,
+#root [tabindex]:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+img {
+  max-width: 100%;
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+.card,
+.modal,
+.dashboard-list-item,
+.quick-action-card,
+.admin-summary-card,
+.admin-action-card,
+.notification-preview,
+.announcement-preview,
+.appointment-summary-card {
+  backdrop-filter: blur(10px);
+}
+
+.empty-message,
+.dashboard-empty-state,
+.empty-state {
+  color: var(--foreground-muted);
+  border: 1px dashed var(--border);
+  border-radius: 24px;
+  background: linear-gradient(180deg, var(--surface-panel), var(--surface-soft-2));
+}
+
+html.dark .empty-message,
+html.dark .dashboard-empty-state,
+html.dark .empty-state {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.inline-actions,
+.form-actions,
+.card-actions,
+.post-actions,
+.modal-actions {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  h1 { font-size: clamp(1.65rem, 8vw, 2.05rem); }
+  h2 { font-size: clamp(1.35rem, 6vw, 1.7rem); }
+  h3 { font-size: clamp(1.1rem, 5vw, 1.35rem); }
+
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Phase 12 addendum + Phase 13: fluid page containers and responsive grids */
+.dashboard-content .container,
+.dashboard-content .resident-dashboard-container,
+.dashboard-content .notifications-page,
+.dashboard-content .profile-settings-shell,
+.dashboard-content .chat-container,
+.dashboard-content .admin-dashboard-page,
+.dashboard-content .emergency-page,
+.dashboard-content .dashboard-page,
+.dashboard-content .chat-page {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.dashboard-content .container {
+  padding-left: clamp(0.75rem, 1vw, 1rem);
+  padding-right: clamp(0.75rem, 1vw, 1rem);
+}
+
+.dashboard-content .card,
+.dashboard-content .dashboard-panel,
+.dashboard-content .page-hero,
+.dashboard-content .emergency-header,
+.dashboard-content .page-header,
+.dashboard-content .admin-page-head,
+.dashboard-content .resident-page-head {
+  max-width: 100%;
+}
+
+.dashboard-content .quick-actions-grid,
+.dashboard-content .resident-stats-grid,
+.dashboard-content .stats-grid,
+.dashboard-content .metric-grid,
+.dashboard-content .admin-summary-grid,
+.dashboard-content .emergency-summary-grid,
+.dashboard-content .emergency-admin-summary,
+.dashboard-content .lost-found-stats,
+.dashboard-content .items-grid,
+.dashboard-content .posts-grid,
+.dashboard-content .features-grid,
+.dashboard-content .admin-action-grid,
+.dashboard-content .accounts-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)) !important;
+}
+
+.dashboard-content .dashboard-overview-grid,
+.dashboard-content .dashboard-overview-grid.equal-panels,
+.dashboard-content .admin-dashboard-grid,
+.dashboard-content .admin-dashboard-grid--main,
+.dashboard-content .admin-dashboard-grid--activity {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)) !important;
+}
+
+.dashboard-content .form-grid,
+.dashboard-content .form-grid-two,
+.dashboard-content .form-grid.two-columns,
+.dashboard-content .profile-form-grid,
+.dashboard-content .appointment-meta-grid,
+.dashboard-content .emergency-detail-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)) !important;
+}
+
+.dashboard-content .data-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dashboard-content .data-table {
+  min-width: 760px;
+}
+
+@media (min-width: 1280px) {
+  .dashboard-content .emergency-summary-grid,
+  .dashboard-content .emergency-admin-summary,
+  .dashboard-content .metric-grid,
+  .dashboard-content .admin-summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  }
+
+  .dashboard-content .emergency-cover-image {
+    max-height: clamp(260px, 24vw, 420px);
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-content .container {
+    gap: 1rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .dashboard-content .emergency-header,
+  .dashboard-content .page-header,
+  .dashboard-content .page-hero,
+  .dashboard-content .welcome-section,
+  .dashboard-content .resident-page-head,
+  .dashboard-content .admin-page-head {
+    border-radius: 20px;
+    padding: 1rem;
+  }
+
+  .dashboard-content .modal-actions,
+  .dashboard-content .emerg-actions,
+  .dashboard-content .item-actions,
+  .dashboard-content .action-buttons,
+  .dashboard-content .inline-actions,
+  .dashboard-content .header-actions,
+  .dashboard-content .header-buttons {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .dashboard-content .modal-actions .btn,
+  .dashboard-content .emerg-actions .btn,
+  .dashboard-content .item-actions .btn,
+  .dashboard-content .action-buttons .btn,
+  .dashboard-content .inline-actions .btn,
+  .dashboard-content .header-actions .btn,
+  .dashboard-content .header-buttons .btn {
+    flex: 1 1 100%;
+  }
+}
+
+.dashboard-content .settings-container,
+.dashboard-content .settings-container-wide,
+.dashboard-content .post-detail-main .container,
+.dashboard-content .notifications-page .container,
+.dashboard-content .settings-page-shell,
+.dashboard-content .profile-settings-shell {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Phase 14 responsive media polish: keep uploaded images presentable on any device */
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.dashboard-layout {
+  overflow-x: hidden;
+}
+
+.dashboard-content {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.dashboard-content .container {
+  min-width: 0;
+}
+
+.dashboard-content img,
+.dashboard-content video {
+  max-width: 100%;
+}
+
+/* Shared fixed-height media surfaces for post cards. This prevents portrait uploads from becoming huge. */
+.dashboard-content .post-cover-image,
+.dashboard-content .emergency-cover-image,
+.dashboard-content .item-image img,
+.dashboard-content .post-detail-image,
+.dashboard-content .emergency-detail-image,
+.dashboard-content .message-image,
+.dashboard-content .pending-image-preview img {
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.dashboard-content .post-cover-image,
+.dashboard-content .emergency-cover-image {
+  height: clamp(170px, 18vw, 260px) !important;
+  max-height: 260px !important;
+  border-radius: 18px 18px 0 0;
+}
+
+.dashboard-content .emergency-cover-image {
+  height: clamp(180px, 18vw, 280px) !important;
+  max-height: 280px !important;
+}
+
+.dashboard-content .post-detail-image,
+.dashboard-content .emergency-detail-image {
+  height: clamp(180px, 22vw, 320px) !important;
+  max-height: 320px !important;
+  border-radius: 18px;
+  background: var(--surface-soft);
+}
+
+.dashboard-content .message-image {
+  max-height: 260px !important;
+  border-radius: 14px;
+}
+
+.dashboard-content .pending-image-preview img {
+  width: 76px !important;
+  height: 76px !important;
+  border-radius: 12px;
+}
+
+/* Lost & Found cards should stay card-sized even when there is only one item. */
+.dashboard-content .items-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 360px)) !important;
+  justify-content: start;
+  align-items: stretch;
+}
+
+.dashboard-content .items-grid .card {
+  width: 100%;
+  max-width: 360px;
+}
+
+.dashboard-content .item-image {
+  aspect-ratio: auto !important;
+  height: clamp(170px, 18vw, 230px) !important;
+  max-height: 230px !important;
+  background: var(--surface-soft);
+}
+
+.dashboard-content .item-image img {
+  height: 100% !important;
+}
+
+/* Job/emergency list cards remain readable but do not let media dominate the page. */
+.dashboard-content .list-stack > .card {
+  overflow: hidden;
+}
+
+.dashboard-content .list-stack > .card .card-content {
+  padding-top: 1rem;
+}
+
+@media (min-width: 1280px) {
+  .dashboard-content {
+    width: calc(100vw - 280px);
+  }
+
+  .dashboard-content .container {
+    padding-left: clamp(1rem, 1.4vw, 1.6rem);
+    padding-right: clamp(1rem, 1.4vw, 1.6rem);
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-content {
+    width: 100%;
+  }
+
+  .dashboard-content .post-cover-image,
+  .dashboard-content .emergency-cover-image {
+    height: clamp(155px, 30vw, 230px) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-content .items-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-content .items-grid .card {
+    max-width: none;
+  }
+
+  .dashboard-content .item-image,
+  .dashboard-content .post-cover-image,
+  .dashboard-content .emergency-cover-image {
+    height: 180px !important;
+  }
+
+  .dashboard-content .post-detail-image,
+  .dashboard-content .emergency-detail-image {
+    height: 210px !important;
+  }
+}
+
+/* Phase 8.2 global adaptive UI hotfix
+   Native responsive system: prevents squeezed cards, horizontal page drift,
+   and oversized controls across resident/admin pages. */
+:root {
+  --adaptive-page-pad: clamp(0.75rem, 1.6vw, 1.5rem);
+  --adaptive-card-pad: clamp(0.9rem, 1.4vw, 1.2rem);
+  --adaptive-radius: clamp(16px, 1.6vw, 24px);
+}
+
+html,
+body,
+#root,
+.dashboard-layout,
+.dashboard-content {
+  width: 100%;
+  max-width: 100%;
+}
+
+body {
+  overflow-x: clip;
+}
+
+#root,
+#root * {
+  min-width: 0;
+}
+
+.dashboard-content,
+.dashboard-content > *,
+.dashboard-content .container,
+.dashboard-content .card,
+.dashboard-content .card-content,
+.dashboard-content .page-hero,
+.dashboard-content .resident-page-head,
+.dashboard-content .admin-page-head,
+.dashboard-content .dashboard-panel,
+.dashboard-content form,
+.dashboard-content section,
+.dashboard-content article {
+  min-width: 0;
+}
+
+.dashboard-content .container {
+  width: 100% !important;
+  max-width: none !important;
+  padding-inline: var(--adaptive-page-pad) !important;
+}
+
+.dashboard-content .card,
+.dashboard-content .dashboard-panel,
+.dashboard-content .page-hero,
+.dashboard-content .resident-page-head,
+.dashboard-content .admin-page-head,
+.dashboard-content .modal,
+.dashboard-content .empty-state {
+  border-radius: var(--adaptive-radius);
+}
+
+.dashboard-content .card-content {
+  padding: var(--adaptive-card-pad);
+}
+
+.dashboard-content h1,
+.dashboard-content h2,
+.dashboard-content h3,
+.dashboard-content h4,
+.dashboard-content p,
+.dashboard-content small,
+.dashboard-content span,
+.dashboard-content strong,
+.dashboard-content label,
+.dashboard-content button,
+.dashboard-content input,
+.dashboard-content select,
+.dashboard-content textarea,
+.dashboard-content a {
+  overflow-wrap: anywhere;
+}
+
+.dashboard-content input,
+.dashboard-content select,
+.dashboard-content textarea,
+.dashboard-content button,
+.dashboard-content .btn {
+  max-width: 100%;
+}
+
+.dashboard-content .toolbar-row,
+.dashboard-content .panel-title-row,
+.dashboard-content .notification-filter-row,
+.dashboard-content .filters-row,
+.dashboard-content .meta-row,
+.dashboard-content .pill-row,
+.dashboard-content .inline-actions,
+.dashboard-content .form-save-row,
+.dashboard-content .settings-save-row,
+.dashboard-content .two-column-form-row,
+.dashboard-content .emergency-contact-row,
+.dashboard-content .notif-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dashboard-content .toolbar-row > *,
+.dashboard-content .panel-title-row > *,
+.dashboard-content .notification-filter-row > *,
+.dashboard-content .filters-row > *,
+.dashboard-content .meta-row > *,
+.dashboard-content .pill-row > *,
+.dashboard-content .inline-actions > *,
+.dashboard-content .form-save-row > *,
+.dashboard-content .settings-save-row > *,
+.dashboard-content .two-column-form-row > *,
+.dashboard-content .emergency-contact-row > *,
+.dashboard-content .notif-title-row > * {
+  min-width: 0;
+}
+
+.dashboard-content .toolbar-row,
+.dashboard-content .panel-title-row,
+.dashboard-content .notification-filter-row,
+.dashboard-content .filters-row,
+.dashboard-content .form-save-row,
+.dashboard-content .settings-save-row {
+  gap: 0.75rem;
+}
+
+.dashboard-content .form-grid,
+.dashboard-content .split-grid,
+.dashboard-content .settings-grid-layout,
+.dashboard-content .profile-settings-grid,
+.dashboard-content .theme-option-grid,
+.dashboard-content .compact-theme-grid,
+.dashboard-content .notification-summary-grid,
+.dashboard-content .analytics-summary-grid,
+.dashboard-content .analytics-chart-grid,
+.dashboard-content .analytics-performance-grid,
+.dashboard-content .smart-grid,
+.dashboard-content .review-grid,
+.dashboard-content .service-guide-grid,
+.dashboard-content .appointment-summary-grid {
+  min-width: 0;
+}
+
+.dashboard-content .split-grid,
+.dashboard-content .settings-grid-layout,
+.dashboard-content .profile-settings-grid,
+.dashboard-content .analytics-chart-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)) !important;
+}
+
+.dashboard-content .notification-summary-grid,
+.dashboard-content .analytics-summary-grid,
+.dashboard-content .analytics-performance-grid,
+.dashboard-content .theme-option-grid,
+.dashboard-content .compact-theme-grid,
+.dashboard-content .review-grid,
+.dashboard-content .appointment-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)) !important;
+}
+
+.dashboard-content .list-stack,
+.dashboard-content .dashboard-list,
+.dashboard-content .notif-list,
+.dashboard-content .analytics-priority-list,
+.dashboard-content .analytics-guide-list,
+.dashboard-content .analytics-bar-list,
+.dashboard-content .analytics-resident-list,
+.dashboard-content .analytics-followup-list,
+.dashboard-content .analytics-location-list {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dashboard-content .dashboard-list-item,
+.dashboard-content .notif-row,
+.dashboard-content .rich-notif-row,
+.dashboard-content .admin-preview-item,
+.dashboard-content .appointment-record-card,
+.dashboard-content .latest-appointment-card,
+.dashboard-content .admin-appointment-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dashboard-content .list-main,
+.dashboard-content .notif-content,
+.dashboard-content .resident-mini-profile div,
+.dashboard-content .profile-info-list,
+.dashboard-content .note-box {
+  min-width: 0;
+}
+
+.dashboard-content .list-main strong,
+.dashboard-content .list-main span,
+.dashboard-content .notif-content strong,
+.dashboard-content .notif-content p,
+.dashboard-content .note-box,
+.dashboard-content .profile-info-list * {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .dashboard-content .toolbar-row,
+  .dashboard-content .panel-title-row,
+  .dashboard-content .notification-filter-row,
+  .dashboard-content .filters-row,
+  .dashboard-content .form-save-row,
+  .dashboard-content .settings-save-row {
+    align-items: stretch !important;
+  }
+
+  .dashboard-content .filters-row,
+  .dashboard-content .notification-filter-row {
+    width: 100%;
+  }
+
+  .dashboard-content .filters-row > *,
+  .dashboard-content .notification-filter-row > *,
+  .dashboard-content .form-save-row > *,
+  .dashboard-content .settings-save-row > * {
+    flex: 1 1 min(100%, 260px);
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --adaptive-page-pad: 0.7rem;
+    --adaptive-card-pad: 0.9rem;
+    --adaptive-radius: 18px;
+  }
+
+  .dashboard-content .container {
+    padding-inline: 0 !important;
+  }
+
+  .dashboard-content .page-hero,
+  .dashboard-content .resident-page-head,
+  .dashboard-content .admin-page-head,
+  .dashboard-content .card-content {
+    padding: 0.9rem !important;
+  }
+
+  .dashboard-content .toolbar-row,
+  .dashboard-content .panel-title-row,
+  .dashboard-content .notification-filter-row,
+  .dashboard-content .filters-row,
+  .dashboard-content .inline-actions,
+  .dashboard-content .modal-actions,
+  .dashboard-content .form-actions,
+  .dashboard-content .card-actions,
+  .dashboard-content .post-actions,
+  .dashboard-content .hero-actions {
+    width: 100%;
+    align-items: stretch !important;
+  }
+
+  .dashboard-content .toolbar-row > *,
+  .dashboard-content .panel-title-row > *,
+  .dashboard-content .notification-filter-row > *,
+  .dashboard-content .filters-row > *,
+  .dashboard-content .inline-actions > *,
+  .dashboard-content .modal-actions > *,
+  .dashboard-content .form-actions > *,
+  .dashboard-content .card-actions > *,
+  .dashboard-content .post-actions > *,
+  .dashboard-content .hero-actions > * {
+    flex: 1 1 100%;
+  }
+
+  .dashboard-content .btn,
+  .dashboard-content button:not(.dashboard-mobile-toggle):not(.dashboard-close-btn):not(.dashboard-nav-group__toggle):not(.dashboard-nav__link),
+  .dashboard-content select,
+  .dashboard-content input,
+  .dashboard-content textarea {
+    width: 100%;
+  }
+
+  .dashboard-content .meta-row,
+  .dashboard-content .pill-row {
+    gap: 0.45rem;
+  }
+
+  .dashboard-content .meta-row span,
+  .dashboard-content .pill-row span,
+  .dashboard-content .badge {
+    max-width: 100%;
+    white-space: normal;
+  }
+}
+
+@supports not (overflow: clip) {
+  body {
+    overflow-x: hidden;
+  }
+}

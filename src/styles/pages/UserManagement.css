@@ -1,0 +1,259 @@
+.user-status-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.user-status-card .card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.user-status-card span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--foreground-muted);
+  font-weight: 700;
+}
+
+.user-status-card strong {
+  font-size: 1.65rem;
+  color: var(--foreground);
+}
+
+.user-status-card.danger strong,
+.user-status-card.danger span svg {
+  color: var(--danger);
+}
+
+.user-management-toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.user-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.user-filter-tabs button {
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground-muted);
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-filter-tabs button span {
+  min-width: 1.35rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--foreground);
+}
+
+.user-filter-tabs button.active,
+.user-filter-tabs button:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.admin-flash {
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-lg);
+  font-weight: 800;
+  border: 1px solid var(--border);
+  animation: flashSlide 0.22s ease-out;
+}
+
+.admin-flash--success {
+  color: var(--success);
+  background: var(--success-soft);
+  border-color: rgba(22, 163, 74, 0.28);
+}
+
+.admin-flash--error {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: rgba(220, 38, 38, 0.28);
+}
+
+.user-status-reason {
+  margin: 0.35rem 0 0;
+  color: var(--foreground-muted);
+  font-size: 0.82rem;
+  max-width: 280px;
+}
+
+.suspension-cell {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.suspension-cell span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 800;
+  color: var(--danger);
+}
+
+.suspension-cell small,
+.muted-text {
+  color: var(--foreground-muted);
+}
+
+.empty-table-cell {
+  text-align: center;
+  color: var(--foreground-muted);
+  padding: var(--space-8) !important;
+}
+
+.moderation-action-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.moderation-action-form label {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--foreground);
+  font-weight: 800;
+}
+
+.moderation-action-form select,
+.moderation-action-form input,
+.moderation-action-form textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.85rem;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+}
+
+.moderation-action-form small {
+  color: var(--foreground-muted);
+  font-weight: 600;
+}
+
+.modal-action-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+@keyframes flashSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .user-management-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .user-filter-tabs {
+    justify-content: flex-start;
+  }
+}
+
+/* Phase 2 moderation policy card */
+.warning-policy-card {
+  margin-bottom: 1rem;
+}
+
+.warning-policy-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.warning-policy-grid span {
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: var(--surface-soft, rgba(255,255,255,0.06));
+  border: 1px solid var(--border);
+  color: var(--foreground-muted);
+  font-size: 0.86rem;
+}
+
+.warning-policy-grid strong {
+  color: var(--foreground);
+}
+
+/* Phase 2.1 editable warning policy controls */
+.warning-policy-grid--editable {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+}
+
+.warning-policy-input {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft, rgba(255,255,255,0.06));
+}
+
+.warning-policy-input span {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.warning-policy-input input {
+  width: 72px;
+  min-width: 72px;
+  padding: 0.45rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface, rgba(255,255,255,0.04));
+  color: var(--foreground);
+}
+
+.warning-policy-input small {
+  color: var(--foreground-muted);
+}
+
+.policy-save-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin-top: 0.85rem;
+  color: var(--foreground-muted);
+}
+
+.admin-flash--warning {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--foreground);
+}

@@ -1,0 +1,266 @@
+.smart-post-form {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.smart-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.smart-section.flush {
+  gap: 0.55rem;
+}
+
+.smart-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.smart-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.smart-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.choice-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.choice-card {
+  min-height: 6.2rem;
+  display: grid;
+  justify-items: start;
+  align-content: center;
+  gap: 0.3rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1.1rem;
+  color: var(--foreground);
+  background: var(--background);
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+
+.choice-card svg {
+  color: var(--primary);
+}
+
+.choice-card strong {
+  font-size: 0.98rem;
+}
+
+.choice-card span {
+  color: var(--foreground-muted);
+  font-size: 0.84rem;
+}
+
+.choice-card.active {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--surface-soft), var(--background));
+  box-shadow: 0 0 0 4px var(--focus-ring), var(--shadow-lg);
+}
+
+.chip-check-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.chip-check-grid.compact {
+  gap: 0.45rem;
+}
+
+.chip-check {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.62rem 0.78rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--foreground-muted);
+  background: var(--background);
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.chip-check input {
+  width: 0.95rem;
+  height: 0.95rem;
+  accent-color: var(--primary);
+  cursor: pointer !important;
+}
+
+.chip-check.active {
+  border-color: var(--primary);
+  background: var(--surface-soft);
+  color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.simple-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: fit-content;
+  padding: 0.72rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--background);
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.simple-checkbox input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--primary);
+  cursor: pointer !important;
+}
+
+.schedule-toggle {
+  background: var(--surface-soft);
+}
+
+.checkbox-stack {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.helper-text {
+  color: var(--foreground-muted);
+  font-size: 0.85rem;
+}
+
+.smart-post-form textarea {
+  width: 100%;
+  min-height: 7rem;
+}
+
+.smart-post-form .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.4rem;
+}
+
+@media (max-width: 820px) {
+  .smart-grid.two,
+  .smart-grid.three,
+  .choice-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .choice-card {
+    min-height: auto;
+  }
+
+  .smart-post-form .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .smart-post-form .modal-actions button {
+    width: 100%;
+  }
+}
+
+.smart-form-notice {
+  padding: 0.85rem 1rem;
+  border-radius: 0.95rem;
+  border: 1px solid var(--border);
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  animation: smartNoticeIn 0.18s ease-out;
+}
+
+.smart-form-notice--success {
+  color: var(--success);
+  background: var(--success-soft);
+  border-color: rgba(16, 185, 129, 0.24);
+}
+
+.smart-form-notice--error {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: rgba(239, 68, 68, 0.24);
+}
+
+.smart-form-notice--info {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: rgba(37, 99, 235, 0.24);
+}
+
+@keyframes smartNoticeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Phase 2.1 smart resident insights */
+.smart-insight-card {
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(15, 23, 42, 0.06));
+}
+
+.smart-suggestion-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.smart-suggestion-item {
+  display: grid;
+  gap: 0.18rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-soft, rgba(255,255,255,0.05));
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.smart-suggestion-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.smart-suggestion-item strong {
+  color: var(--primary);
+}
+
+.smart-suggestion-item small,
+.job-fit-card small {
+  color: var(--foreground-muted);
+}
+
+.job-fit-card {
+  margin-bottom: 1rem;
+}
+
+/* Phase 4: job card content should stay readable even with large images */
+.job-feed-card .job-feed-title {
+  margin-bottom: 0.35rem;
+}
+
+.job-feed-card .job-feed-description {
+  margin-bottom: 0.85rem;
+  color: var(--foreground-muted);
+}
+
+.job-feed-card .job-feed-media {
+  margin: 0.35rem 0 0.9rem;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.job-feed-card .job-feed-media .smart-media-frame--cover {
+  border-radius: 18px;
+  max-height: 230px;
+}

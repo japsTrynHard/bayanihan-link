@@ -1,0 +1,476 @@
+/* Phase 11 scoped profile/settings polish */
+.settings-page-shell,
+.profile-settings-shell {
+  min-height: auto;
+}
+
+.settings-container,
+.profile-settings-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 var(--space-4) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.settings-container-wide {
+  max-width: 1280px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.settings-hero-card,
+.profile-hero-card {
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--surface-panel), var(--surface-soft-2));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+  margin-bottom: 0;
+}
+
+.profile-hero-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  border-radius: 999px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.profile-settings-grid {
+  align-items: start;
+}
+
+.profile-summary-card,
+.profile-form-card,
+.settings-card {
+  background: var(--background);
+}
+
+.profile-summary-head {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  margin-bottom: var(--space-5, 1.25rem);
+}
+
+.profile-summary-head h2 {
+  margin-bottom: 0.25rem;
+}
+
+.profile-summary-head p {
+  margin-bottom: 0.75rem;
+  color: var(--foreground-muted);
+}
+
+.profile-info-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.profile-info-list > div {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-soft-2);
+  color: var(--foreground);
+}
+
+.profile-info-list svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.profile-info-list.compact > div {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.profile-info-list.compact strong {
+  color: var(--foreground-muted);
+  font-size: 0.9rem;
+}
+
+.profile-info-list.compact span {
+  text-align: right;
+}
+
+.profile-form-grid {
+  grid-template-columns: 1fr;
+}
+
+.form-save-row,
+.settings-save-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.save-message {
+  color: var(--success);
+  min-height: 24px;
+  font-weight: 600;
+}
+
+.settings-grid-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.settings-card-wide {
+  min-width: 0;
+}
+
+.settings-card .card-title,
+.settings-card h3,
+.profile-form-card h3,
+.profile-summary-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-status-box {
+  margin-bottom: var(--space-4);
+}
+
+.settings-status-box span {
+  color: var(--foreground-muted);
+}
+
+.theme-option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.compact-theme-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.theme-option-card {
+  display: grid;
+  gap: 0.4rem;
+  text-align: left;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  min-height: 118px;
+}
+
+.compact-theme-grid .theme-option-card {
+  min-height: 92px;
+}
+
+.theme-option-card svg {
+  color: var(--primary);
+}
+
+.theme-option-card span {
+  color: var(--foreground-muted);
+  font-size: 0.92rem;
+}
+
+.theme-option-card:hover {
+  border-color: var(--primary);
+  background: var(--surface-soft);
+}
+
+.theme-option-card.active {
+  border-color: var(--primary);
+  background: var(--surface-soft);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.notification-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.compact-notification-grid {
+  grid-template-columns: 1fr;
+}
+
+.notif-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface-soft-2);
+  transition: var(--transition);
+}
+
+.notif-toggle:hover {
+  background: var(--surface-soft);
+  border-color: rgba(30, 64, 175, 0.25);
+}
+
+.notif-toggle input[type="checkbox"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.toggle-label {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.danger-zone {
+  border-color: var(--danger);
+}
+
+.danger-text {
+  color: var(--foreground-muted);
+  margin-bottom: var(--space-4);
+}
+
+html.dark .settings-hero-card,
+html.dark .profile-hero-card,
+html.dark .profile-info-list > div,
+html.dark .theme-option-card,
+html.dark .notif-toggle {
+  border-color: var(--border);
+}
+
+html.dark .theme-option-card.active,
+html.dark .theme-option-card:hover,
+html.dark .notif-toggle:hover {
+  background: rgba(96, 165, 250, 0.12);
+}
+
+html.dark input:disabled {
+  background: var(--surface-soft);
+  color: var(--foreground-muted);
+  opacity: 1;
+}
+
+@media (max-width: 960px) {
+  .settings-grid-layout,
+  .profile-settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-theme-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .settings-container,
+  .profile-settings-shell {
+    gap: var(--space-4);
+  }
+
+  .profile-summary-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .form-save-row,
+  .settings-save-row {
+    align-items: stretch;
+  }
+}
+
+/* Phase 12 settings/profile polish */
+.profile-form-grid,
+.form-grid {
+  align-items: start;
+}
+
+.profile-info-list div {
+  min-width: 0;
+}
+
+.profile-info-list span {
+  overflow-wrap: anywhere;
+}
+
+.save-message:not(:empty) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+html.dark .save-message:not(:empty) {
+  background: rgba(96, 165, 250, 0.12);
+  color: var(--primary-light);
+}
+
+@media (max-width: 980px) {
+  .profile-settings-grid,
+  .settings-grid-layout,
+  .split-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-summary-head,
+  .form-save-row,
+  .settings-save-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .form-save-row .btn,
+  .settings-save-row .btn,
+  .inline-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Phase 5 profile/security improvements */
+.two-column-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.profile-form-card .image-uploader {
+  margin-top: 0.25rem;
+}
+
+.profile-form-card textarea {
+  width: 100%;
+}
+
+html.dark .profile-form-card textarea {
+  background: var(--background);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+@media (max-width: 720px) {
+  .two-column-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Phase 1.1 clearer profile/settings flash messages */
+.save-message--success:not(:empty) {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.save-message--error:not(:empty) {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.warning-note {
+  border-color: rgba(245, 158, 11, 0.28);
+  background: var(--warning-soft);
+  color: var(--warning-text);
+}
+
+.danger-note {
+  border-color: rgba(220, 38, 38, 0.28);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.warning-history-box {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-soft-2);
+}
+
+.warning-history-box strong {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.warning-history-box ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--foreground-muted);
+}
+
+.warning-history-box li + li {
+  margin-top: 0.45rem;
+}
+
+.warning-history-box small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--foreground-muted);
+}
+
+/* Phase 7.1 profile emergency contacts */
+.emergency-contacts-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-soft-2);
+}
+
+.emergency-contacts-editor__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.emergency-contacts-editor__head p {
+  margin: 0.25rem 0 0;
+  color: var(--foreground-muted);
+  font-size: 0.9rem;
+}
+
+.emergency-contact-row {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr 1fr auto;
+  gap: var(--space-3);
+  align-items: end;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+}
+
+@media (max-width: 960px) {
+  .emergency-contact-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .emergency-contacts-editor__head,
+  .emergency-contact-row {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+}

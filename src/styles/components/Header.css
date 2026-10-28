@@ -1,0 +1,233 @@
+.header {
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
+  gap: var(--space-6);
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logo-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 1.125rem;
+  box-shadow: var(--shadow);
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--foreground);
+}
+
+.header-nav {
+  display: flex;
+  gap: var(--space-6);
+  flex: 1;
+}
+
+.nav-link {
+  color: var(--foreground);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: var(--transition);
+}
+
+.nav-link:hover {
+  color: var(--primary);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.header-auth {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.header-icon-btn {
+  position: relative;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius);
+  transition: var(--transition);
+  background-color: var(--secondary);
+}
+
+.header-icon-btn:hover {
+  background-color: var(--border-light);
+  color: var(--primary);
+}
+
+.badge-count {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  background-color: var(--danger);
+  color: white;
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.header-user {
+  position: relative;
+}
+
+.user-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  min-width: 150px;
+  margin-top: var(--space-2);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header-user:hover .user-menu {
+  display: flex;
+}
+
+.menu-item {
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  background: none;
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.menu-item:hover {
+  background-color: var(--secondary);
+  color: var(--primary);
+}
+
+.logout-btn {
+  color: var(--danger);
+  font-weight: 600;
+  border-top: 1px solid var(--border);
+}
+
+.logout-btn:hover {
+  background-color: var(--danger-light);
+  color: var(--danger);
+}
+
+.header-buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  cursor: pointer;
+  padding: var(--space-2);
+  font-size: 1.5rem;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .header-container {
+    height: 3.5rem;
+    gap: var(--space-4);
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .header-nav {
+    position: absolute;
+    top: 3.5rem;
+    left: 0;
+    right: 0;
+    background-color: var(--background);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    gap: 0;
+    display: none;
+  }
+
+  .header-nav.open {
+    display: flex;
+  }
+
+  .nav-link {
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-right {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .header-buttons {
+    gap: var(--space-1);
+  }
+}
+
+
+.header-logo-img {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: var(--shadow);
+}
+.logo-text span { color: var(--primary); }

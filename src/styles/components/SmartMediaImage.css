@@ -1,0 +1,242 @@
+.smart-media-trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  text-align: left;
+}
+
+.smart-media-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: #0f172a;
+}
+
+.smart-media-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 62%, rgba(2, 6, 23, 0.24));
+  pointer-events: none;
+}
+
+.smart-media-frame--card,
+.smart-media-frame--cover {
+  height: clamp(230px, 32vw, 430px);
+  max-height: 430px;
+  border-radius: 18px 18px 0 0;
+}
+
+.smart-media-frame--detail {
+  height: clamp(280px, 36vw, 520px);
+  max-height: 520px;
+  border-radius: 18px;
+}
+
+.smart-media-frame--chat {
+  width: min(280px, 72vw);
+  height: min(280px, 72vw);
+  border-radius: 16px;
+}
+
+.smart-media-frame--thumb {
+  height: 86px;
+  max-height: 86px;
+  border-radius: 14px;
+}
+
+.smart-media-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.22s ease, filter 0.22s ease;
+}
+
+.smart-media-trigger:hover .smart-media-image {
+  transform: scale(1.018);
+  filter: brightness(1.04);
+}
+
+.smart-media-hint {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 2;
+  padding: 0.32rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.72);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+}
+
+.smart-media-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.smart-media-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: rgba(0, 0, 0, 0.92);
+  animation: smartViewerIn 0.16s ease-out;
+}
+
+.smart-media-viewer__backdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-out;
+}
+
+.smart-media-viewer__topbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1.15rem;
+  color: white;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0));
+}
+
+.smart-media-viewer__topbar strong,
+.smart-media-viewer__topbar span {
+  display: block;
+}
+
+.smart-media-viewer__topbar strong {
+  font-size: 0.98rem;
+  max-width: min(70vw, 760px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.smart-media-viewer__topbar span {
+  margin-top: 0.1rem;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.78rem;
+}
+
+.smart-media-viewer__close {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+}
+
+.smart-media-viewer__stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 1rem 1rem;
+}
+
+.smart-media-viewer__image {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 94px);
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  border-radius: 10px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+@keyframes smartViewerIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .smart-media-frame--card,
+  .smart-media-frame--cover {
+    height: clamp(220px, 72vw, 380px);
+  }
+
+  .smart-media-frame--detail {
+    height: clamp(240px, 78vw, 430px);
+  }
+
+  .smart-media-hint {
+    right: 0.55rem;
+    bottom: 0.55rem;
+  }
+
+  .smart-media-viewer__topbar {
+    padding: 0.85rem;
+  }
+}
+
+/* Phase 3: feed cards should feel like social apps: compact preview first, clear content below. */
+.smart-media-trigger.post-cover-image,
+.smart-media-trigger.emergency-cover-image,
+.smart-media-trigger.post-detail-image,
+.smart-media-trigger.emergency-detail-image,
+.smart-media-trigger.message-image {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.smart-media-frame--cover {
+  aspect-ratio: 16 / 9;
+  height: auto !important;
+  min-height: 0;
+  max-height: 280px;
+  border-radius: 18px 18px 0 0;
+}
+
+.smart-media-frame--card {
+  aspect-ratio: 4 / 3;
+  height: auto !important;
+  min-height: 0;
+  max-height: 260px;
+}
+
+.smart-media-frame--detail {
+  aspect-ratio: 16 / 9;
+  height: auto !important;
+  min-height: 0;
+  max-height: min(62vh, 520px);
+}
+
+.list-stack > .card .smart-media-trigger + .card-content,
+.list-stack > .card .post-cover-image + .card-content {
+  padding-top: 1.05rem;
+}
+
+@media (max-width: 768px) {
+  .smart-media-frame--cover,
+  .smart-media-frame--detail {
+    max-height: 240px;
+  }
+}

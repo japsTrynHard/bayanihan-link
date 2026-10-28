@@ -1,0 +1,89 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+/* Variants */
+.badge-default {
+  background-color: var(--primary);
+  color: white;
+}
+
+.badge-secondary {
+  background-color: var(--secondary);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+.badge-success {
+  background-color: var(--success-soft);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-danger {
+  background-color: var(--danger-light);
+  color: var(--danger-text);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.badge-warning {
+  background-color: var(--warning-soft);
+  color: var(--warning-text);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-job {
+  background-color: rgba(59, 130, 246, 0.14);
+  color: var(--primary);
+  border: 1px solid rgba(30, 64, 175, 0.3);
+}
+
+.badge-help {
+  background-color: var(--success-soft);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-emergency {
+  background-color: var(--danger-light);
+  color: var(--danger-text);
+  font-weight: 700;
+}
+
+.badge-lost {
+  background-color: var(--warning-soft);
+  color: var(--warning-text);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-found {
+  background-color: var(--success-soft);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Sizes */
+.badge-sm {
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.75rem;
+}
+
+.badge-md {
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.875rem;
+}
+
+.badge-lg {
+  padding: var(--space-2) var(--space-4);
+  font-size: 1rem;
+}
+
+
+html.dark .badge-secondary {
+  background-color: var(--surface-soft);
+}

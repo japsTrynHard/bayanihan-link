@@ -1,0 +1,101 @@
+.card {
+  background: linear-gradient(180deg, var(--surface-panel) 0%, var(--background) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: var(--transition);
+}
+
+.card-elevated {
+  box-shadow: var(--shadow);
+}
+
+.card-hoverable:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-light);
+}
+
+.card-header {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+  margin-bottom: var(--space-2);
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: var(--foreground-muted);
+  margin: 0;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.card-footer {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+
+.card {
+  box-shadow: var(--shadow);
+}
+
+.card-hoverable:hover {
+  transform: translateY(-2px);
+}
+
+html.dark .card {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(11, 18, 32, 0.96) 100%);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+/* Phase 12 card polish */
+.card {
+  border-radius: 22px;
+}
+
+.card-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.9rem;
+}
+
+.card-content {
+  gap: 1rem;
+}
+
+.card-hoverable:hover {
+  border-color: rgba(59, 130, 246, 0.24);
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 1rem;
+    border-radius: 18px;
+  }
+  .card-title {
+    font-size: 1.18rem;
+  }
+  .card-footer {
+    justify-content: stretch;
+  }
+  .card-footer .btn,
+  .card-footer button,
+  .card-footer a {
+    flex: 1 1 100%;
+  }
+}
