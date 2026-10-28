@@ -20,3 +20,6 @@ dist/
 *.zip
 .next/
 .DS_Store
+
+.vercel
+.env*
