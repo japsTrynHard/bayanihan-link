@@ -184,38 +184,38 @@ function PostDetail() {
     (notificationActorId && String(response.userId || response.uid || "") === String(notificationActorId)),
   );
 
-  const handleShowInterest = () => {
+  const handleShowInterest = async () => {
     if (isAdmin || isOwnPost || isClosed) return;
 
     if (isJobPost) {
-      const result = respondToJobPost(post.id, user, "interested");
+      const result = await respondToJobPost(post.id, user, "interested").catch((error) => { window.alert(error.message || "Unable to save response."); return null; });
       if (!result || alreadyResponded) window.alert("You already responded to this job post.");
       return;
     }
 
     if (isLostFoundPost) {
-      const result = respondToLostFoundPost(
+      const result = await respondToLostFoundPost(
         post.id,
         user,
         getLostFoundResponseText(post),
-      );
+      ).catch((error) => { window.alert(error.message || "Unable to save response."); return null; });
       if (!result || alreadyResponded) window.alert("You already responded to this case.");
     }
   };
 
-  const handleContactUser = () => {
+  const handleContactUser = async () => {
     if (isAdmin || !user || !post.author || isOwnPost || isClosed) return;
     if (isJobPost) {
-      respondToJobPost(post.id, user, "chat");
+      await respondToJobPost(post.id, user, "chat").catch((error) => { window.alert(error.message || "Unable to save response."); return null; });
     }
     if (isLostFoundPost) {
-      respondToLostFoundPost(post.id, user, "Chat started");
+      await respondToLostFoundPost(post.id, user, "Chat started").catch((error) => { window.alert(error.message || "Unable to save response."); return null; });
     }
-    const chat = startChatFromPost(user, post, isJobPost ? "job_detail_chat" : "lost_found_detail_chat");
+    const chat = await startChatFromPost(user, post, isJobPost ? "job_detail_chat" : "lost_found_detail_chat")?.catch((error) => { window.alert(error.message || "Unable to open chat. Please try again."); return null; });
     if (chat) navigate(`/chat?chat=${chat.id}`);
   };
 
-  const handleChatWithResponse = (response) => {
+  const handleChatWithResponse = async (response) => {
     if (!user || isAdmin || !response?.userId || response.userId === user.id) return;
     const otherUser = {
       id: response.userId,
@@ -224,12 +224,12 @@ function PostDetail() {
       barangay: response.barangay || post.barangay || "",
       role: "resident",
     };
-    const chat = getOrCreateChat?.(user, otherUser, {
+    const chat = await getOrCreateChat?.(user, otherUser, {
       relatedPostId: post.id,
       relatedPostTitle: post.title,
       relatedPostType: isJobPost ? "Job Post" : isLostFoundPost ? getLostFoundCaseLabel(post) : "Community Post",
       source: fromNotifications ? "notification_response_detail" : "post_response_detail",
-    });
+    })?.catch((error) => { window.alert(error.message || "Unable to open chat. Please try again."); return null; });
     if (chat?.id) navigate(`/chat?chat=${chat.id}`);
   };
 

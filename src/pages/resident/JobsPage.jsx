@@ -496,7 +496,7 @@ function JobsPage() {
     }
   };
 
-  const handleInterest = (post) => {
+  const handleInterest = async (post) => {
     if (
       post.author?.id === user?.id ||
       post.status === "Closed" ||
@@ -504,13 +504,13 @@ function JobsPage() {
     )
       return;
     const alreadyResponded = (post.interestedUserIds || []).includes(user?.id);
-    respondToJobPost(post.id, user, "interested");
+    await respondToJobPost(post.id, user, "interested").catch((error) => { window.alert(error.message || "Unable to save response."); return null; });
     if (alreadyResponded) {
       window.alert("You already responded to this job post.");
     }
   };
 
-  const handleChat = (post) => {
+  const handleChat = async (post) => {
     if (
       !user ||
       !post.author ||
@@ -519,8 +519,8 @@ function JobsPage() {
       isSlotsFull(post)
     )
       return;
-    respondToJobPost(post.id, user, "chat");
-    const chat = startChatFromPost(user, post, "job_chat");
+    await respondToJobPost(post.id, user, "chat").catch((error) => { window.alert(error.message || "Unable to save response."); return null; });
+    const chat = await startChatFromPost(user, post, "job_chat")?.catch((error) => { window.alert(error.message || "Unable to open chat. Please try again."); return null; });
     if (chat) navigate(`/chat?chat=${chat.id}`);
   };
 

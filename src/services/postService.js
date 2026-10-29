@@ -1,3 +1,4 @@
+import { removeUndefined, toIso } from "../utils/firestoreData";
 import {
   collection,
   deleteDoc,
@@ -5,6 +6,7 @@ import {
   getDoc,
   onSnapshot,
   query,
+  runTransaction,
   setDoc,
   updateDoc,
   where,
@@ -23,15 +25,6 @@ const POST_RESPONSES_COLLECTION = "postResponses";
 
 const nowIso = () => new Date().toISOString();
 
-const toIso = (value) => {
-  if (!value) return "";
-  if (typeof value === "string") return value;
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value?.toDate === "function") return value.toDate().toISOString();
-  if (typeof value?.seconds === "number")
-    return new Date(value.seconds * 1000).toISOString();
-  return String(value);
-};
 
 const displayDate = (value) => {
   const iso = toIso(value) || nowIso();
@@ -44,23 +37,6 @@ const displayDate = (value) => {
   });
 };
 
-const removeUndefined = (value) => {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => removeUndefined(item))
-      .filter((item) => item !== undefined);
-  }
-
-  if (value && typeof value === "object" && !(value instanceof Date)) {
-    return Object.entries(value).reduce((acc, [key, item]) => {
-      const cleaned = removeUndefined(item);
-      if (cleaned !== undefined) acc[key] = cleaned;
-      return acc;
-    }, {});
-  }
-
-  return value === undefined ? undefined : value;
-};
 
 const normalizeImage = (image) => normalizeImageList(image)[0] || "";
 
@@ -364,4 +340,53 @@ export const createPostResponseInFirestore = async (postId, response = {}) => {
     merge: true,
   });
   return payload;
+};
+
+// Keep the response and its summary in one transaction. Concurrent responders
+// must not replace each other's arrays or inflate the count when they retry.
+export const respondToPostInFirestore = async (postId, response = {}) => {
+  if (!postId || !response.userId) throw new Error("Post and responder IDs are required.");
+  const postRef = doc(db, POSTS_COLLECTION, postId);
+  const responseId = response.id || `${postId}-${response.userId}`;
+  const responseRef = doc(db, POST_RESPONSES_COLLECTION, responseId);
+  const database = db;
+  for (let attempt = 0; ; attempt++) {
+    let observedIds = [];
+    try {
+      return await runTransaction(database, async (transaction) => {
+    const snapshot = await transaction.get(postRef);
+    if (!snapshot.exists()) throw new Error("This post is no longer available.");
+    const post = normalizeFirestorePost(snapshot.id, snapshot.data());
+    observedIds = post.interestedUserIds;
+    if (post.authorId === response.userId) throw new Error("You cannot respond to your own post.");
+    if (post.status !== "Active") throw new Error("This post is no longer accepting responses.");
+    if (post.interestedUserIds.includes(response.userId)) return { post, created: false };
+    await transaction.get(responseRef);
+    const record = removeUndefined({ ...response, id: responseId, createdAt: response.createdAt || nowIso() });
+    const updates = {
+      responses: [...post.responses, record],
+      interestedUserIds: [...post.interestedUserIds, response.userId],
+      interests: post.interestedUserIds.length + 1,
+      lastResponseAt: record.createdAt,
+      updatedAt: serverTimestamp(), updatedAtIso: nowIso(),
+    };
+    transaction.update(postRef, updates);
+    transaction.set(responseRef, {
+      ...record, postId, postType: post.type,
+      responderId: response.userId, responderName: response.userName || "Resident",
+      createdAtIso: record.createdAt, createdAt: serverTimestamp(),
+    });
+    return { post: normalizeFirestorePost(postId, { ...post, ...updates }), response: record, created: true };
+      });
+    } catch (error) {
+      if (error.code !== "permission-denied" || attempt >= 3) throw error;
+      // Rules can reject a stale append before Firestore reports a conflict.
+      // Retry only if another response changed the record we just read.
+      const latest = await getDoc(postRef);
+      if (!latest.exists()) throw error;
+      const post = normalizeFirestorePost(latest.id, latest.data());
+      if (post.interestedUserIds.includes(response.userId)) return { post, created: false };
+      if (JSON.stringify(post.interestedUserIds) === JSON.stringify(observedIds)) throw error;
+    }
+  }
 };

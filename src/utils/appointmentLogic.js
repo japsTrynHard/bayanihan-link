@@ -167,8 +167,11 @@ export const ACTIVE_APPOINTMENT_STATUSES = [
 const pad = (number) => String(number).padStart(2, "0");
 
 export const getTodayIsoDate = () => {
-  const date = new Date();
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(new Date());
+  const get = (type) => parts.find((part) => part.type === type).value;
+  return `${get("year")}-${get("month")}-${get("day")}`;
 };
 
 export const getServiceById = (serviceIdOrName) => {
@@ -221,8 +224,10 @@ export const formatDateLabel = (dateString = "") => {
 };
 
 export const getDateDayIndex = (dateString = "") => {
-  const date = new Date(`${dateString}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? -1 : date.getDay();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return -1;
+  const date = new Date(`${dateString}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== dateString
+    ? -1 : date.getUTCDay();
 };
 
 export const isPastDate = (dateString = "") => {
@@ -296,7 +301,9 @@ export const generateAppointmentSlots = ({
   const slots = [];
   const start = timeToMinutes(schedule.officeStart);
   const end = timeToMinutes(schedule.officeEnd);
-  const interval = Number(schedule.slotIntervalMinutes) || DEFAULT_BARANGAY_SCHEDULE.slotIntervalMinutes;
+  const configuredInterval = Number(schedule.slotIntervalMinutes);
+  const interval = Number.isFinite(configuredInterval) && configuredInterval > 0
+    ? configuredInterval : DEFAULT_BARANGAY_SCHEDULE.slotIntervalMinutes;
   const officeDate = isOfficeDate(date, service.id, schedule);
 
   for (let minute = start; minute < end; minute += interval) {
@@ -306,15 +313,22 @@ export const generateAppointmentSlots = ({
       { barangay, preferredDate: date, preferredTime: time, excludeId },
       schedule,
     );
-    const lunch = isLunchTime(time, schedule);
-    const disabled = !officeDate || lunch || usage.isFull;
+    const finish = minute + service.estimatedDuration;
+    const lunch = minute < timeToMinutes(schedule.lunchEnd) && finish > timeToMinutes(schedule.lunchStart);
+    const overClosing = finish > end;
+    const elapsed = new Date(`${date}T${time}:00+08:00`).getTime() <= Date.now();
+    const disabled = !officeDate || lunch || overClosing || elapsed || usage.isFull;
     const reason = !officeDate
       ? "Closed"
       : lunch
         ? "Lunch break"
-        : usage.isFull
-          ? "Full"
-          : `${usage.left} slot${usage.left === 1 ? "" : "s"} left`;
+        : overClosing
+          ? "Insufficient time before closing"
+          : elapsed
+            ? "Time has passed"
+            : usage.isFull
+              ? "Full"
+              : `${usage.left} slot${usage.left === 1 ? "" : "s"} left`;
 
     slots.push({
       id: `${date}-${time}`,

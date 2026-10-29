@@ -273,8 +273,11 @@ function EmergencyAssistance() {
     );
   };
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setFormError("");
 
     const landmark = formData.landmark.trim();
@@ -306,7 +309,9 @@ function EmergencyAssistance() {
 
     const roleLabel = REPORTER_ROLE_LABELS[formData.reporterRole] || "Witness report";
     const contactSnapshot = formData.reporterRole === "self" ? savedEmergencyContacts : [];
-    const created = createEmergency({
+    setIsSubmitting(true);
+    try {
+    const created = await createEmergency({
       emergencyType: formData.emergencyType,
       reporterRole: formData.reporterRole,
       victimName: formData.reporterRole === "self" ? user?.name || "Resident" : victimName,
@@ -343,6 +348,11 @@ function EmergencyAssistance() {
     setFormData(initialForm(currentBarangay));
     setIsModalOpen(false);
     setSelectedEmergencyId(created?.id || null);
+    } catch (error) {
+      setFormError(error.message || "Emergency report was not saved. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -522,7 +532,7 @@ function EmergencyAssistance() {
           <div className="emergency-submit-note">After submitting, only you and authorized barangay admins can track this emergency case. It will not appear as a public resident feed post.</div>
           <div className="modal-actions">
             <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button variant="danger" type="submit" disabled={isUploadingImage || isLocating || formData.locationStatus === SERVICE_AREA_STATUS.OUTSIDE}>{isUploadingImage ? "Uploading photo..." : "Submit Emergency Report"}</Button>
+            <Button variant="danger" type="submit" isLoading={isSubmitting} disabled={isUploadingImage || isLocating || formData.locationStatus === SERVICE_AREA_STATUS.OUTSIDE}>{isUploadingImage ? "Uploading photo..." : "Submit Emergency Report"}</Button>
           </div>
         </form>
       </Modal>

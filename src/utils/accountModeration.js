@@ -18,7 +18,6 @@ export const getWarningSeverityOption = (value = "minor") =>
 const normalize = (value = "") => String(value || "").trim().toLowerCase();
 
 export const getAccountIdentityKeys = (account = {}) => {
-  const name = normalize(account?.name || account?.displayName || `${account?.firstName || ""} ${account?.lastName || ""}`.trim());
   const email = normalize(account?.email || "");
 
   return [
@@ -29,7 +28,6 @@ export const getAccountIdentityKeys = (account = {}) => {
     account?.participantId,
     email,
     email ? `email:${email}` : "",
-    name ? `name:${name}` : "",
   ]
     .filter(Boolean)
     .map((item) => String(item));
@@ -158,7 +156,10 @@ export const applyModerationToUser = (account = {}) => {
 
   const sourceRecord = normalizeRecord(account) || account;
   const localRecord = getLocalModerationRecord(sourceRecord);
-  const record = localRecord || sourceRecord;
+  const sourceTime = new Date(account.moderationUpdatedAt || account.updatedAt || account.createdAt || 0).getTime();
+  const localTime = new Date(localRecord?.updatedAt || 0).getTime();
+  const record = localRecord && !(sourceTime > 0 && sourceTime >= localTime)
+    ? localRecord : sourceRecord;
 
   return {
     ...account,
@@ -321,7 +322,6 @@ export const createActivationRecord = (targetUser = {}, reason = "", adminUser =
 
 export const getAccountStatusInfo = (account = {}, latestUsers = []) => {
   const keys = new Set(getAccountIdentityKeys(account).map((key) => String(key).toLowerCase()));
-  const normalizedName = normalize(account?.name || account?.displayName || `${account?.firstName || ""} ${account?.lastName || ""}`.trim());
   const normalizedEmail = normalize(account?.email || "");
 
   const latest = latestUsers.find((item) => {
@@ -329,10 +329,8 @@ export const getAccountStatusInfo = (account = {}, latestUsers = []) => {
     const keyMatch = itemKeys.some((key) => keys.has(key));
     if (keyMatch) return true;
 
-    const itemName = normalize(item?.name || item?.displayName || `${item?.firstName || ""} ${item?.lastName || ""}`.trim());
     const itemEmail = normalize(item?.email || "");
-    return (normalizedEmail && itemEmail && normalizedEmail === itemEmail) ||
-      (normalizedName && itemName && normalizedName === itemName);
+    return (normalizedEmail && itemEmail && normalizedEmail === itemEmail);
   });
 
   // Latest user records must win over stale participant snapshots from old chats.

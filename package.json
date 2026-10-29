@@ -7,7 +7,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run --exclude tests/firestore.integration.test.js",
+    "test:firestore": "vitest run tests/firestore.integration.test.js",
+    "lint": "eslint src",
+    "test:emulator": "npx --yes firebase-tools@15.18.0 emulators:exec --only firestore --project demo-bayanihan \"npm run test:firestore\""
   },
   "dependencies": {
     "firebase": "^12.12.1",
@@ -17,11 +21,17 @@
     "react-router-dom": "^6.20.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/postcss": "^4.2.2",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.16",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
     "postcss": "^8.4.32",
+    "react-test-renderer": "^18.3.1",
     "tailwindcss": "^3.3.6",
-    "vite": "^7.3.2"
+    "vite": "^7.3.2",
+    "vitest": "^5.0.5"
   }
 }

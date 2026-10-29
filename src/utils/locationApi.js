@@ -23,6 +23,7 @@ export const SAN_MIGUEL_BOUNDS = {
 };
 
 const toNumber = (value) => {
+  if (value == null || String(value).trim() === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 };

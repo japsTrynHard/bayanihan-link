@@ -679,7 +679,7 @@ function LostAndFound() {
     }
   };
 
-  const handleQuickResponse = (post) => {
+  const handleQuickResponse = async (post) => {
     if (post.author?.id === user?.id || (post.status || "Active") !== "Active")
       return;
     if (
@@ -699,11 +699,11 @@ function LostAndFound() {
     )
       return;
 
-    const updated = respondToLostFoundPost(
+    const updated = await respondToLostFoundPost(
       post.id,
       user,
       getLostFoundResponseText(post),
-    );
+    ).catch((error) => { window.alert(error.message || "Unable to save response."); return null; });
     if (!updated) {
       setSubmitNotice({
         type: "info",
@@ -718,7 +718,7 @@ function LostAndFound() {
     }
   };
 
-  const handleClaimSubmit = (e) => {
+  const handleClaimSubmit = async (e) => {
     e.preventDefault();
     if (!claimPost) return;
     const proof = claimProof.trim();
@@ -743,7 +743,7 @@ function LostAndFound() {
       return;
 
     const responseLabel = getLostFoundResponseText(claimPost, proof);
-    const updated = respondToLostFoundPost(claimPost.id, user, responseLabel);
+    const updated = await respondToLostFoundPost(claimPost.id, user, responseLabel).catch((error) => { window.alert(error.message || "Unable to save response."); return null; });
     if (!updated) {
       setSubmitNotice({
         type: "info",
@@ -761,7 +761,7 @@ function LostAndFound() {
     setClaimProof("");
   };
 
-  const handleChat = (post) => {
+  const handleChat = async (post) => {
     if (
       !user ||
       !post.author ||
@@ -777,8 +777,8 @@ function LostAndFound() {
       )
     )
       return;
-    respondToLostFoundPost(post.id, user, "Chat started");
-    const chat = startChatFromPost(user, post, "lost_found_chat");
+    await respondToLostFoundPost(post.id, user, "Chat started").catch((error) => { window.alert(error.message || "Unable to save response."); return null; });
+    const chat = await startChatFromPost(user, post, "lost_found_chat")?.catch((error) => { window.alert(error.message || "Unable to open chat. Please try again."); return null; });
     if (chat) navigate(`/chat?chat=${chat.id}`);
   };
 

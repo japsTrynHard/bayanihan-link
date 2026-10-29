@@ -218,7 +218,7 @@ const getActionPlan = (post, intel, adminBarangay) => {
   if (bestMatch && bestMatch.percentage >= 80) {
     return {
       title: "Check the strong smart match",
-      description: `The system found a ${bestMatch.percentage}% match with \"${bestMatch.candidate.title}\". Compare details and contact the involved residents before confirming a claim.`,
+      description: `The system found a ${bestMatch.percentage}% match with "${bestMatch.candidate.title}". Compare details and contact the involved residents before confirming a claim.`,
       primaryAction: "Claimed",
       secondaryAction: "Active",
       openMatch: true,
@@ -403,7 +403,7 @@ function LostAndFoundMonitoringPage() {
     if ((post.status || "Active") === status) {
       setActionNotice({
         type: "info",
-        message: `No duplicate action: \"${post.title}\" is already marked as ${status}.`,
+        message: `No duplicate action: "${post.title}" is already marked as ${status}.`,
       });
       return;
     }
@@ -413,7 +413,7 @@ function LostAndFoundMonitoringPage() {
       moderatedBy: user?.id,
       moderatedAt: new Date().toISOString(),
       notificationTitle: "Lost & Found Status Updated",
-      notificationMessage: `Your ${getLostFoundCaseLabel(post).toLowerCase()} post \"${post.title}\" was marked as ${status} by the barangay admin.`,
+      notificationMessage: `Your ${getLostFoundCaseLabel(post).toLowerCase()} post "${post.title}" was marked as ${status} by the barangay admin.`,
       notificationPriority: ["Closed", "Flagged"].includes(status)
         ? "medium"
         : "normal",
@@ -435,7 +435,7 @@ function LostAndFoundMonitoringPage() {
     if (post.status === "Flagged") {
       setActionNotice({
         type: "info",
-        message: `No duplicate action: \"${post.title}\" is already flagged.`,
+        message: `No duplicate action: "${post.title}" is already flagged.`,
       });
       return;
     }
@@ -447,7 +447,7 @@ function LostAndFoundMonitoringPage() {
       flaggedBy: user?.id,
       flaggedAt: new Date().toISOString(),
       notificationTitle: "Lost & Found Post Flagged",
-      notificationMessage: `Your ${getLostFoundCaseLabel(post).toLowerCase()} post \"${post.title}\" was flagged by the barangay admin.`,
+      notificationMessage: `Your ${getLostFoundCaseLabel(post).toLowerCase()} post "${post.title}" was flagged by the barangay admin.`,
       notificationPriority: "medium",
     });
     setActionNotice({
@@ -467,7 +467,7 @@ function LostAndFoundMonitoringPage() {
     if (post.status === "Removed") {
       setActionNotice({
         type: "info",
-        message: `No duplicate action: \"${post.title}\" is already removed.`,
+        message: `No duplicate action: "${post.title}" is already removed.`,
       });
       return;
     }

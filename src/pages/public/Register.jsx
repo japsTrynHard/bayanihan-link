@@ -11,7 +11,7 @@ import { BARANGAYS } from "../../utils/storage";
 import "../../styles/pages/Auth.css";
 
 function Register() {
-  const { register, isLoading } = useAuth();
+  const { register, isSubmitting: isLoading } = useAuth();
   const { barangays = BARANGAYS, barangaySource = "fallback-static" } = useApp();
   const navigate = useNavigate();
   // useState: Controls kung makikita o naka-hide ang password field.

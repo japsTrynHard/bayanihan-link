@@ -57,7 +57,7 @@ import {
 } from "../services/barangayService";
 import {
   createPostInFirestore,
-  createPostResponseInFirestore,
+  respondToPostInFirestore,
   deletePostFromFirestore,
   normalizeFirestorePost,
   subscribePostsForUser,
@@ -555,7 +555,7 @@ export function AppProvider({ children }) {
           payload.author?.barangay ||
           "";
         const isAllBarangays = payload.isAllBarangays === true;
-        let workBarangay = payload.workBarangay;
+        let workBarangay;
         if (isAllBarangays) {
           workBarangay = "all";
         } else {
@@ -819,8 +819,8 @@ export function AppProvider({ children }) {
 
   // Users
   useEffect(() => {
-    if (!currentUser?.barangay) {
-      setUsers([]);
+    if (!currentUser?.barangay || currentUser.role !== "barangay_admin") {
+      setUsers(currentUser ? [currentUser] : []);
       return undefined;
     }
     const unsubscribe = subscribeUsersByBarangay(
@@ -832,7 +832,7 @@ export function AppProvider({ children }) {
       },
     );
     return () => unsubscribe?.();
-  }, [currentUser?.barangay]);
+  }, [currentUser?.id, currentUser?.barangay, currentUser?.role]);
 
   // Chats
   // Chats
@@ -843,22 +843,17 @@ export function AppProvider({ children }) {
       return undefined;
     }
 
-    const localChats = getChats();
-    setChats(normalizeChatListForState(localChats));
-
-    const unsubscribe = subscribeChatsForUser(
-      currentUser,
-      (remoteChats) => {
-        const merged = mergeRecordsById(remoteChats, getChats());
-        setChats(normalizeChatListForState(merged));
-      },
-      (error) => {
-        console.error("Chat subscription error:", error);
-        setChats(normalizeChatListForState(getChats()));
-      },
-    );
+    setChats([]);
+    const unsubscribe = subscribeChatsForUser(currentUser, (remoteChats) => {
+      // The server is authoritative; cached arrays must not restore old messages.
+      const nextChats = normalizeChatListForState(remoteChats);
+      localStorage.setItem("chats", JSON.stringify(nextChats));
+      setChats(nextChats);
+    }, (error) => {
+      console.error("Chat subscription error:", error);
+    });
     return () => unsubscribe?.();
-  }, [currentUser?.id, currentUser?.uid, currentUser?.email, users]);
+  }, [currentUser?.id, currentUser?.uid, currentUser?.email]);
 
   // Reports
   useEffect(() => {
@@ -1135,7 +1130,7 @@ export function AppProvider({ children }) {
     } catch (error) {
       console.error("Unable to create Firestore post.", error);
       setAllPosts((posts) => posts.filter((post) => post.id !== postId));
-      throw new Error(error.message || "Post was not created.");
+      throw new Error(error.message || "Post was not created.", { cause: error });
     }
     if (["lost", "found"].includes(newPost.type)) {
       const possibleMatches = getTopLostFoundMatches(newPost, allPosts, 3);
@@ -1343,108 +1338,35 @@ export function AppProvider({ children }) {
     return updated;
   };
 
-  const respondToJobPost = (
-    postId,
-    currentUser,
-    responseType = "interested",
-  ) => {
-    const post = findPostById(postId);
-    if (
-      !post ||
-      post.type !== "job" ||
-      !currentUser ||
-      post.author?.id === currentUser.id
-    )
-      return null;
-    if (isSuspendedAccount(currentUser))
-      return {
-        ...post,
-        error:
-          getActionRestriction(
-            currentUser,
-            RESTRICTED_RESIDENT_ACTIONS.RESPOND_TO_POST,
-          ).reason || "Suspended accounts cannot respond.",
-      };
-    if ([JOB_POST_STATUS.CLOSED, JOB_POST_STATUS.REMOVED].includes(post.status))
-      return post;
-    const existingResponderIds = Array.isArray(post.interestedUserIds)
-      ? post.interestedUserIds
-      : [];
-    const alreadyResponded = existingResponderIds.includes(currentUser.id);
+  const respondToCommunityPost = async (postId, actor, responseType, lostFound = false) => {
+    assertResidentCanCreate(actor, RESTRICTED_RESIDENT_ACTIONS.RESPOND_TO_POST);
     const now = new Date();
-    const nextResponse = {
-      id: `job-response-${Date.now()}`,
-      userId: currentUser.id,
-      userName: currentUser.name,
-      barangay: currentUser.barangay,
-      responseType,
-      createdAt: now.toISOString(),
-      timestamp: now.toLocaleString([], {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      }),
-      status: "Active",
-    };
-    const updates = {
-      interests: alreadyResponded
-        ? post.interests || 0
-        : (post.interests || 0) + 1,
-      interestedUserIds: alreadyResponded
-        ? existingResponderIds
-        : [...existingResponderIds, currentUser.id],
-      responses: alreadyResponded
-        ? post.responses || []
-        : [...(post.responses || []), nextResponse],
-      lastResponseAt: now.toISOString(),
-    };
-    const updated = normalizeFirestorePost(postId, {
-      ...post,
-      ...updates,
-      updatedAt: now.toISOString(),
+    const result = await respondToPostInFirestore(postId, {
+      userId: actor.uid || actor.id, userName: actor.name, barangay: actor.barangay,
+      responseType, timestamp: now.toLocaleString(), createdAt: now.toISOString(), status: "Active",
     });
-    setAllPosts((posts) =>
-      posts.map((item) => (item.id === postId ? updated : item)),
-    );
-    persistPostUpdate(postId, updates, post);
-    if (!alreadyResponded) {
-      createPostResponseInFirestore(postId, {
-        ...nextResponse,
-        postType: "job",
-        responderId: currentUser.id,
-        responderName: currentUser.name,
-      }).catch((error) => console.warn("Unable to save job response.", error));
-    }
-    if (!alreadyResponded && post.author?.id) {
-      createNotificationRecord({
-        type: "post",
-        title: "Job Post Response",
-        message: `${currentUser.name} responded to your job post: ${post.title}. Open the notification to view the response, or use Chat Now to coordinate directly.`,
-        priority: "normal",
-        actionPath: `/post/${post.id}`,
-        targetUserIds: getAccountIdentityKeys(
-          post.author || { id: post.author.id },
-        ),
-        targetBarangay: post.barangay,
-        homeBarangay: currentUser.barangay,
-        sourceBarangay: currentUser.barangay,
-        relatedPost: post.id,
-        relatedPostType: "job",
-        relatedResponse: nextResponse.id,
-        responsePreview: nextResponse.responseType,
-        actorUserId: currentUser.id || currentUser.uid,
-        actorUserName: currentUser.name,
-        actorBarangay: currentUser.barangay,
-        actionChatUserId: currentUser.id || currentUser.uid,
-        actionChatUserName: currentUser.name || "Interested resident",
-        actionLabel: "Chat Now",
-        dedupeKey: `job-response-${post.id}-${currentUser.id || currentUser.uid}`,
-      });
-    }
-    return updated;
+    setAllPosts((posts) => posts.map((post) => post.id === postId ? result.post : post));
+    if (!result.created) return lostFound ? null : result.post;
+    const post = result.post;
+    createNotificationRecord({
+      type: "post", title: isMissingPersonCase(post) ? "Missing-Person Information Received" : lostFound ? "Lost & Found Response" : "Job Post Response",
+      message: actor.name + " responded to your post: " + post.title,
+      priority: isMissingPersonCase(post) ? "high" : "normal", actionPath: "/post/" + post.id,
+      targetUserIds: getPostOwnerTargetIds(post), targetBarangay: post.barangay,
+      homeBarangay: actor.barangay, sourceBarangay: actor.barangay,
+      relatedPost: post.id, relatedPostType: lostFound ? "lost_found" : "job",
+      relatedResponse: result.response.id, responsePreview: responseType,
+      relatedCaseType: lostFound ? getLostFoundCaseLabel(post) : "", evidenceSummary: responseType,
+      actorUserId: actor.uid || actor.id, actorUserName: actor.name,
+      actorBarangay: actor.barangay, actionChatUserId: actor.uid || actor.id,
+      actionChatUserName: actor.name, actionLabel: "Chat Now",
+      dedupeKey: "post-response-" + post.id + "-" + (actor.uid || actor.id),
+    });
+    return post;
   };
+
+  const respondToJobPost = (postId, actor, responseType = "interested") =>
+    respondToCommunityPost(postId, actor, responseType);
 
   const setJobPostStatus = (postId, status) => {
     const nextStatus = Object.values(JOB_POST_STATUS).includes(status)
@@ -1453,109 +1375,8 @@ export function AppProvider({ children }) {
     return updatePost(postId, { status: nextStatus, notifyOwner: false });
   };
 
-  const respondToLostFoundPost = (
-    postId,
-    currentUser,
-    responseType = "responded",
-  ) => {
-    const post = findPostById(postId);
-    if (
-      !post ||
-      !["lost", "found"].includes(post.type) ||
-      !currentUser ||
-      post.author?.id === currentUser.id
-    )
-      return null;
-    if (isSuspendedAccount(currentUser))
-      return {
-        ...post,
-        error:
-          getActionRestriction(
-            currentUser,
-            RESTRICTED_RESIDENT_ACTIONS.RESPOND_TO_POST,
-          ).reason || "Suspended accounts cannot respond.",
-      };
-    if (post.status !== LOST_FOUND_STATUS.ACTIVE) return post;
-    const existingResponderIds = Array.isArray(post.interestedUserIds)
-      ? post.interestedUserIds
-      : [];
-    const alreadyResponded = existingResponderIds.includes(currentUser.id);
-    if (alreadyResponded) return null;
-    const now = new Date();
-    const nextResponse = {
-      id: `lost-found-response-${Date.now()}`,
-      userId: currentUser.id,
-      userName: currentUser.name,
-      barangay: currentUser.barangay,
-      responseType,
-      createdAt: now.toISOString(),
-      timestamp: now.toLocaleString([], {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      }),
-      status: "Active",
-    };
-    const updates = {
-      interests: (post.interests || 0) + 1,
-      interestedUserIds: [...existingResponderIds, currentUser.id],
-      responses: [
-        ...(Array.isArray(post.responses) ? post.responses : []),
-        nextResponse,
-      ],
-      lastResponseAt: now.toISOString(),
-    };
-    const updated = normalizeFirestorePost(postId, {
-      ...post,
-      ...updates,
-      updatedAt: now.toISOString(),
-    });
-    setAllPosts((posts) =>
-      posts.map((item) => (item.id === postId ? updated : item)),
-    );
-    persistPostUpdate(postId, updates, post);
-    createPostResponseInFirestore(postId, {
-      ...nextResponse,
-      postType: post.type,
-      responderId: currentUser.id,
-      responderName: currentUser.name,
-    }).catch((error) =>
-      console.warn("Unable to save lost/found response.", error),
-    );
-    if (post.author?.id) {
-      createNotificationRecord({
-        type: "post",
-        title: isMissingPersonCase(post)
-          ? "Missing-Person Information Received"
-          : "Lost & Found Response",
-        message: `${currentUser.name} responded to your ${getLostFoundCaseLabel(post).toLowerCase()}: ${post.title}. Open the notification to view the responder, barangay, and proof/details; use Chat Now for direct coordination.`,
-        priority: isMissingPersonCase(post) ? "high" : "normal",
-        actionPath: `/post/${post.id}`,
-        targetUserIds: getAccountIdentityKeys(
-          post.author || { id: post.author.id },
-        ),
-        targetBarangay: post.barangay,
-        homeBarangay: currentUser.barangay,
-        sourceBarangay: currentUser.barangay,
-        relatedPost: post.id,
-        relatedPostType: "lost_found",
-        relatedCaseType: getLostFoundCaseLabel(post),
-        relatedResponse: nextResponse.id,
-        responsePreview: nextResponse.responseType,
-        evidenceSummary: nextResponse.responseType,
-        actorUserId: currentUser.id || currentUser.uid,
-        actorUserName: currentUser.name,
-        actorBarangay: currentUser.barangay,
-        actionChatUserId: currentUser.id || currentUser.uid,
-        actionChatUserName: currentUser.name,
-        actionLabel: "Chat Now",
-        dedupeKey: `lost-found-response-${post.id}-${currentUser.id || currentUser.uid}`,
-      });
-    }
-    return updated;
-  };
+  const respondToLostFoundPost = (postId, actor, responseType = "responded") =>
+    respondToCommunityPost(postId, actor, responseType, true);
 
   const deletePost = (postId) => {
     const previousPost = findPostById(postId);
@@ -2010,37 +1831,16 @@ export function AppProvider({ children }) {
     return chat;
   };
 
-  const getOrCreateChat = (currentUser, otherUser, context = {}) => {
-    assertResidentCanCreate(
-      currentUser,
-      RESTRICTED_RESIDENT_ACTIONS.CREATE_CHAT,
-    );
-    const chat = storageGetOrCreateChat({ currentUser, otherUser, context });
-    if (chat) {
-      setChats((items) =>
-        normalizeChatListForState([
-          chat,
-          ...items.filter((item) => item.id !== chat.id),
-        ]),
-      );
-      createOrGetChatInFirestore({ currentUser, otherUser, context })
-        .then((remoteChat) => {
-          if (remoteChat)
-            setChats((items) =>
-              normalizeChatListForState([
-                remoteChat,
-                ...items.filter((item) => item.id !== remoteChat.id),
-              ]),
-            );
-        })
-        .catch((error) =>
-          console.warn("Unable to sync Firestore chat.", error),
-        );
-    }
+  const getOrCreateChat = async (actor, otherUser, context = {}) => {
+    assertResidentCanCreate(actor, RESTRICTED_RESIDENT_ACTIONS.CREATE_CHAT);
+    const chat = await createOrGetChatInFirestore({ currentUser: actor, otherUser, context });
+    const localChats = getChats();
+    localStorage.setItem("chats", JSON.stringify([chat, ...localChats.filter((item) => item.id !== chat.id)]));
+    setChats((items) => normalizeChatListForState([chat, ...items.filter((item) => item.id !== chat.id)]));
     return chat;
   };
 
-  const startChatFromPost = (
+  const startChatFromPost = async (
     currentUser,
     post,
     source = "post_interaction",
@@ -2074,36 +1874,7 @@ export function AppProvider({ children }) {
             : "Community Post",
       source,
     };
-    const chat = storageGetOrCreateChat({
-      currentUser,
-      otherUser: post.author,
-      context: chatContext,
-    });
-    if (chat) {
-      setChats((items) =>
-        normalizeChatListForState([
-          chat,
-          ...items.filter((item) => item.id !== chat.id),
-        ]),
-      );
-      createOrGetChatInFirestore({
-        currentUser,
-        otherUser: post.author,
-        context: chatContext,
-      })
-        .then((remoteChat) => {
-          if (remoteChat)
-            setChats((items) =>
-              normalizeChatListForState([
-                remoteChat,
-                ...items.filter((item) => item.id !== remoteChat.id),
-              ]),
-            );
-        })
-        .catch((error) =>
-          console.warn("Unable to sync post chat to Firestore.", error),
-        );
-    }
+    const chat = await getOrCreateChat(currentUser, post.author, chatContext);
     const directResponseChat = [
       "job_detail_chat",
       "lost_found_detail_chat",
@@ -2128,7 +1899,7 @@ export function AppProvider({ children }) {
     return chat;
   };
 
-  const startChatFromNotification = (currentUser, notification = {}) => {
+  const startChatFromNotification = async (currentUser, notification = {}) => {
     if (!currentUser?.id) return null;
     if (notification?.relatedChat) {
       const existingChat =
@@ -2210,7 +1981,7 @@ export function AppProvider({ children }) {
     return getOrCreateChat(currentUser, otherUser, context);
   };
 
-  const addMessage = (chatId, message) => {
+  const addMessage = async (chatId, message) => {
     const messageAccess = getActionRestriction(
       currentUser,
       RESTRICTED_RESIDENT_ACTIONS.SEND_MESSAGE,
@@ -2227,6 +1998,8 @@ export function AppProvider({ children }) {
       console.warn("Message send skipped because chat was not found:", chatId);
       return null;
     }
+    if (chatBeforeUpdate.status === "ended") throw new Error("This conversation has ended.");
+    if (!String(message.text || "").trim() && !message.image) throw new Error("Message cannot be empty.");
     const createdAt = message.createdAt || new Date().toISOString();
     const nextMessage = {
       ...message,
@@ -2247,6 +2020,7 @@ export function AppProvider({ children }) {
         new Set([...(message.readBy || []), message.senderId].filter(Boolean)),
       ),
     };
+    await addMessageToChatInFirestore(chatId, nextMessage, chatBeforeUpdate);
     const localChat = storageAddMessage(chatId, nextMessage);
     const optimisticChat = normalizeChatForState(
       localChat || {
@@ -2301,9 +2075,6 @@ export function AppProvider({ children }) {
           null,
       });
     }
-    addMessageToChatInFirestore(chatId, nextMessage, chatBeforeUpdate).catch(
-      (error) => console.warn("Unable to save Firestore chat message.", error),
-    );
     return optimisticChat;
   };
 
@@ -2707,8 +2478,17 @@ export function AppProvider({ children }) {
       : "/dashboard";
   };
 
+  const persistCreatedRecord = async (key, record, save) => {
+    try { await save(record); }
+    catch (error) {
+      const records = JSON.parse(localStorage.getItem(key) || "[]");
+      localStorage.setItem(key, JSON.stringify(records.filter((item) => item.id !== record.id)));
+      throw error;
+    }
+  };
+
   // ----- Emergency functions (modified: removed loadAllData) -----
-  const createEmergency = (emergencyData) => {
+  const createEmergency = async (emergencyData) => {
     const payload = lockBarangayForResident(
       emergencyData,
       emergencyData.author,
@@ -2758,13 +2538,11 @@ export function AppProvider({ children }) {
         },
       ],
     });
+    await persistCreatedRecord("emergencies", newEmergency, createEmergencyInFirestore);
     setEmergencies((items) => [
       newEmergency,
       ...items.filter((item) => item.id !== newEmergency.id),
     ]);
-    createEmergencyInFirestore(newEmergency).catch((error) =>
-      console.warn("Unable to save Firestore emergency report.", error),
-    );
     createNotificationRecord({
       type: "emergency",
       title: "New Emergency Report",
@@ -2965,13 +2743,11 @@ export function AppProvider({ children }) {
         });
       });
     }
-    if (shouldShowPublicEmergency) {
-    }
     return updated;
   };
 
   // ----- Appointment functions (modified: removed loadAllData) -----
-  const createAppointment = (appointmentData) => {
+  const createAppointment = async (appointmentData) => {
     const actor = currentUser || {
       id: appointmentData.userId,
       uid: appointmentData.uid,
@@ -3074,14 +2850,12 @@ export function AppProvider({ children }) {
         },
       ],
     });
+    await persistCreatedRecord("appointments", newAppointment, createAppointmentInFirestore);
     setAppointments((items) =>
       sortNewestFirst([
         newAppointment,
         ...items.filter((item) => item.id !== newAppointment.id),
       ]),
-    );
-    createAppointmentInFirestore(newAppointment).catch((error) =>
-      console.warn("Unable to save Firestore appointment request.", error),
     );
     createNotificationRecord({
       type: "appointment",
@@ -3109,7 +2883,7 @@ export function AppProvider({ children }) {
     return newAppointment;
   };
 
-  const updateAppointment = (appointmentId, updates = {}, actorUser = null) => {
+  const updateAppointment = async (appointmentId, updates = {}, actorUser = null) => {
     const previous =
       appointments.find((appointment) => appointment.id === appointmentId) ||
       getAppointments().find((appointment) => appointment.id === appointmentId);
@@ -3230,6 +3004,7 @@ export function AppProvider({ children }) {
         logEntry,
       ],
     };
+    await updateAppointmentInFirestore(appointmentId, updatePayload);
     const updated = normalizeAppointment({
       ...previous,
       ...updatePayload,
@@ -3245,9 +3020,6 @@ export function AppProvider({ children }) {
     } catch (error) {
       console.warn("Unable to update local appointment cache.", error);
     }
-    updateAppointmentInFirestore(appointmentId, updatePayload).catch((error) =>
-      console.warn("Unable to update Firestore appointment request.", error),
-    );
     if (actorUser && (updates.status || note || scheduleChanged)) {
       recordAudit({
         action:

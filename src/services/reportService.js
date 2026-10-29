@@ -1,3 +1,4 @@
+import { removeUndefined, toIso } from "../utils/firestoreData";
 import {
   collection,
   doc,
@@ -16,26 +17,7 @@ const REPORTS_COLLECTION = "reports";
 
 const nowIso = () => new Date().toISOString();
 
-const toIso = (value) => {
-  if (!value) return "";
-  if (typeof value === "string") return value;
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value?.toDate === "function") return value.toDate().toISOString();
-  if (typeof value?.seconds === "number") return new Date(value.seconds * 1000).toISOString();
-  return String(value);
-};
 
-const removeUndefined = (value) => {
-  if (Array.isArray(value)) return value.map(removeUndefined).filter((item) => item !== undefined);
-  if (value && typeof value === "object" && !(value instanceof Date)) {
-    return Object.entries(value).reduce((acc, [key, item]) => {
-      const cleaned = removeUndefined(item);
-      if (cleaned !== undefined) acc[key] = cleaned;
-      return acc;
-    }, {});
-  }
-  return value === undefined ? undefined : value;
-};
 
 export const normalizeFirestoreReport = (id, data = {}) => normalizeReport({
   ...data,
@@ -58,7 +40,9 @@ export const subscribeReportsForUser = (currentUser, callback, onError) => {
     return () => {};
   }
 
-  const reportsQuery = query(collection(db, REPORTS_COLLECTION), where("barangay", "==", currentUser.barangay));
+  const reportsQuery = currentUser.role === "barangay_admin"
+    ? query(collection(db, REPORTS_COLLECTION), where("barangay", "==", currentUser.barangay))
+    : query(collection(db, REPORTS_COLLECTION), where("reportedById", "==", currentUser.uid || currentUser.id));
 
   return onSnapshot(
     reportsQuery,

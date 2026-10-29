@@ -27,11 +27,11 @@ service cloud.firestore {
 
     function sameBarangay(data) {
       return signedIn() && (
-        data.barangay == profile().barangay ||
-        data.targetBarangay == profile().barangay ||
-        data.incidentBarangay == profile().barangay ||
-        data.itemBarangay == profile().barangay ||
-        data.homeBarangay == profile().barangay ||
+        data.get("barangay", "") == profile().barangay ||
+        data.get("targetBarangay", "") == profile().barangay ||
+        data.get("incidentBarangay", "") == profile().barangay ||
+        data.get("itemBarangay", "") == profile().barangay ||
+        data.get("homeBarangay", "") == profile().barangay ||
         (data.keys().hasAny(['targetBarangays']) && data.targetBarangays.hasAny([profile().barangay]))
       );
     }
@@ -45,7 +45,7 @@ service cloud.firestore {
 
     function visibleAnnouncement(data) {
       return signedIn() && (
-        data.targetMode == 'all' ||
+        data.get("targetMode", "") == 'all' ||
         sameBarangay(data)
       );
     }
@@ -57,62 +57,87 @@ service cloud.firestore {
     function createsOwnLostFoundRoute() {
       return signedIn() &&
         request.resource.data.type in ['lost', 'found'] &&
-        request.resource.data.authorId == request.auth.uid &&
+        request.resource.data.get("authorId", "") == request.auth.uid &&
         (
-          request.resource.data.homeBarangay == profile().barangay ||
-          request.resource.data.barangay == profile().barangay ||
+          request.resource.data.get("homeBarangay", "") == profile().barangay ||
+          request.resource.data.get("barangay", "") == profile().barangay ||
           (request.resource.data.keys().hasAny(['author']) && request.resource.data.author.barangay == profile().barangay)
         );
     }
 
     function owns(data) {
       return signedIn() && (
-        data.userId == request.auth.uid ||
-        data.authorId == request.auth.uid ||
-        data.uid == request.auth.uid ||
-        data.id == request.auth.uid
+        data.get("userId", "") == request.auth.uid ||
+        data.get("authorId", "") == request.auth.uid ||
+        data.get("uid", "") == request.auth.uid ||
+        data.get("id", "") == request.auth.uid ||
+        data.get("reportedById", "") == request.auth.uid
       );
     }
 
     function createsOwnBarangayRecord() {
       return signedIn() && (
-        request.resource.data.barangay == profile().barangay ||
-        request.resource.data.targetBarangay == profile().barangay
+        request.resource.data.get("barangay", "") == profile().barangay ||
+        request.resource.data.get("targetBarangay", "") == profile().barangay
       );
     }
 
+    function addsOwnPostResponse() {
+      let before = resource.data;
+      let after = request.resource.data;
+      let ids = before.get('interestedUserIds', []);
+      let responses = before.get('responses', []);
+      return isResident() && isActive() && before.status == 'Active' &&
+        before.authorId != request.auth.uid && !(request.auth.uid in ids) &&
+        after.diff(before).affectedKeys().hasOnly([
+          'responses', 'interestedUserIds', 'interests', 'lastResponseAt', 'updatedAt', 'updatedAtIso'
+        ]) &&
+        after.interestedUserIds == ids.concat([request.auth.uid]) &&
+        after.interests == ids.size() + 1 &&
+        after.responses.size() == responses.size() + 1 &&
+        after.responses[responses.size()].userId == request.auth.uid &&
+        after.responses == responses.concat([after.responses[responses.size()]]);
+    }
+
     match /users/{userId} {
-      allow read: if signedIn() && (
-        request.auth.uid == userId ||
-        (isBarangayAdmin() && resource.data.barangay == profile().barangay)
-      );
-
-      allow create: if signedIn() && request.auth.uid == userId;
-
+      allow read: if signedIn() && (request.auth.uid == userId ||
+        (isBarangayAdmin() && resource.data.barangay == profile().barangay));
+      // Admin roles must be provisioned through a trusted server or the console.
+      allow create: if signedIn() && request.auth.uid == userId &&
+        request.resource.data.role == 'resident' &&
+        request.resource.data.uid == userId && request.resource.data.id == userId &&
+        request.resource.data.status == 'Active' && request.resource.data.warnings == [];
       allow update: if signedIn() && (
         (request.auth.uid == userId &&
-          request.resource.data.diff(resource.data).changedKeys().hasOnly([
+          (resource.data.role != 'barangay_admin' || request.resource.data.barangay == resource.data.barangay) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'name', 'firstName', 'lastName', 'email', 'phone', 'barangay', 'avatar',
-            'avatarUrl', 'avatarPublicId', 'profilePicture', 'bio',
-            'emergencyContacts', 'notificationPreferences', 'securityPreferences', 'updatedAt'
-          ])
-        ) ||
-        (isBarangayAdmin() && resource.data.barangay == profile().barangay)
+            'avatarUrl', 'avatarPublicId', 'profilePicture', 'bio', 'emergencyContacts',
+            'notificationPreferences', 'securityPreferences', 'updatedAt'
+          ])) ||
+        (isBarangayAdmin() && resource.data.role == 'resident' && resource.data.barangay == profile().barangay &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'statusReason', 'warnings', 'latestWarning', 'warningExpiresAt',
+            'warningSeverity', 'warningDurationHours', 'lastWarningRemovalReason',
+            'lastWarningRemovedAt', 'suspensionSeverity', 'suspensionStartedAt',
+            'suspensionEndsAt', 'suspensionDurationDays', 'moderationUpdatedAt',
+            'moderationUpdatedBy', 'lastRestoreReason', 'lastRestoredAt', 'updatedAt'
+          ]))
       );
-
       allow delete: if false;
     }
 
     match /posts/{postId} {
-      allow read: if signedIn() && (sameBarangay(resource.data) || owns(resource.data));
-      allow create: if isResident() && isActive() && request.resource.data.authorId == request.auth.uid && (createsOwnBarangayRecord() || createsOwnLostFoundRoute());
-      allow update: if signedIn() && (
-        (isResident() && isActive() && owns(resource.data)) ||
-        (isBarangayAdmin() && sameBarangay(resource.data))
+      allow read: if signedIn() && (isResident() || sameBarangay(resource.data) || owns(resource.data));
+      allow create: if isResident() && isActive() && request.resource.data.get("authorId", "") == request.auth.uid && (createsOwnBarangayRecord() || createsOwnLostFoundRoute() || (request.resource.data.type == "job" && request.resource.data.homeBarangay == profile().barangay));
+      allow update: if signedIn() &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(["authorId", "userId", "uid", "id", "barangay", "homeBarangay"]) && (
+        (isResident() && isActive() && owns(resource.data)) || addsOwnPostResponse() ||
+        (isBarangayAdmin() && resource.data.barangay == profile().barangay)
       );
       allow delete: if signedIn() && (
         (isResident() && owns(resource.data)) ||
-        (isBarangayAdmin() && sameBarangay(resource.data))
+        (isBarangayAdmin() && resource.data.barangay == profile().barangay)
       );
     }
 
@@ -130,39 +155,48 @@ service cloud.firestore {
         owns(resource.data) ||
         resource.data.visibility.showToPublic == true
       );
-      allow create: if isResident() && isActive() && createsOwnBarangayRecord() && request.resource.data.userId == request.auth.uid;
-      allow update: if signedIn() && (
+      allow create: if isResident() && (createsOwnBarangayRecord() || request.resource.data.get("homeBarangay", "") == profile().barangay) && request.resource.data.get("userId", "") == request.auth.uid;
+      allow update: if signedIn() &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(["authorId", "userId", "uid", "id", "barangay", "homeBarangay"]) && (
         (isResident() && isActive() && owns(resource.data)) ||
-        (isBarangayAdmin() && sameBarangay(resource.data))
+        (isBarangayAdmin() && resource.data.barangay == profile().barangay)
       );
       allow delete: if false;
     }
 
     match /emergencyLocations/{emergencyId} {
-      allow read: if isBarangayAdmin() && sameBarangay(resource.data);
-      allow create: if isResident() && isActive() && createsOwnBarangayRecord() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isBarangayAdmin() && sameBarangay(resource.data);
+      allow read: if isBarangayAdmin() && resource.data.barangay == profile().barangay;
+      allow create: if isResident() && (createsOwnBarangayRecord() || request.resource.data.get("homeBarangay", "") == profile().barangay) && request.resource.data.get("authorId", "") == request.auth.uid;
+      allow update: if isBarangayAdmin() && resource.data.barangay == profile().barangay;
       allow delete: if false;
     }
 
     match /appointments/{appointmentId} {
       allow read: if signedIn() && (owns(resource.data) || (isBarangayAdmin() && sameBarangay(resource.data)));
-      allow create: if isResident() && isActive() && createsOwnBarangayRecord() && request.resource.data.userId == request.auth.uid;
-      allow update: if signedIn() && (
-        (isResident() && isActive() && owns(resource.data)) ||
-        (isBarangayAdmin() && sameBarangay(resource.data))
+      allow create: if isResident() && isActive() && createsOwnBarangayRecord() && request.resource.data.get("userId", "") == request.auth.uid && request.resource.data.status == "Pending";
+      allow update: if signedIn() &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(["authorId", "userId", "uid", "id", "barangay", "homeBarangay"]) && (
+        (isResident() && isActive() && owns(resource.data) &&
+          request.resource.data.preferredDate == resource.data.preferredDate &&
+          request.resource.data.preferredTime == resource.data.preferredTime &&
+          ((request.resource.data.status == 'Cancelled' && resource.data.status in ['Pending', 'Approved', 'Reschedule Requested']) ||
+            (request.resource.data.status == 'Approved' && resource.data.status == 'Reschedule Requested')))  ||
+        (isBarangayAdmin() && resource.data.barangay == profile().barangay)
       );
       allow delete: if false;
     }
 
     match /chats/{chatId} {
+      // Transactions may check a deterministic conversation ID before creation.
+      allow get: if signedIn() && !exists(/databases/$(database)/documents/chats/$(chatId));
       allow read: if signedIn() && (
         request.auth.uid in resource.data.participants ||
         request.auth.token.email in resource.data.participantKeys ||
-        (isBarangayAdmin() && resource.data.barangay == profile().barangay && resource.data.reported == true)
+        (isBarangayAdmin() && resource.data.get("barangay", "") == profile().barangay && resource.data.reported == true)
       );
-      allow create: if signedIn() && isActive();
-      allow update: if signedIn() && isActive() && (
+      allow create: if signedIn() && isActive() && request.auth.uid in request.resource.data.participants && request.resource.data.participants.size() == 2;
+      allow update: if signedIn() && isActive() &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(["participants", "participantKeys", "participantProfiles"]) && (
         request.auth.uid in resource.data.participants ||
         request.auth.token.email in resource.data.participantKeys
       );
@@ -173,7 +207,7 @@ service cloud.firestore {
       allow read: if signedIn() && (sameBarangay(resource.data) || directlyTargetsCurrentUser(resource.data));
       allow create: if signedIn() && (
         createsOwnBarangayRecord() ||
-        request.resource.data.homeBarangay == profile().barangay ||
+        request.resource.data.get("homeBarangay", "") == profile().barangay ||
         directlyTargetsCurrentUser(request.resource.data)
       );
       allow update: if signedIn() && (sameBarangay(resource.data) || directlyTargetsCurrentUser(resource.data));
@@ -182,16 +216,25 @@ service cloud.firestore {
 
     match /announcements/{announcementId} {
       allow read: if signedIn() && visibleAnnouncement(resource.data);
-      allow create, update, delete: if isBarangayAdmin() && createsOwnBarangayRecord();
+      allow create: if isBarangayAdmin() && createsOwnBarangayRecord();
+      allow update: if isBarangayAdmin() && resource.data.barangay == profile().barangay && request.resource.data.barangay == resource.data.barangay;
+      allow delete: if isBarangayAdmin() && resource.data.barangay == profile().barangay;
     }
 
     match /reports/{reportId} {
       allow read: if signedIn() && (
         owns(resource.data) ||
-        (isBarangayAdmin() && sameBarangay(resource.data))
+        (isBarangayAdmin() && resource.data.barangay == profile().barangay)
       );
-      allow create: if isResident() && isActive() && createsOwnBarangayRecord() && request.resource.data.reportedById == request.auth.uid;
-      allow update: if isBarangayAdmin() && sameBarangay(resource.data);
+      allow create: if isResident() && isActive() && (createsOwnBarangayRecord() || request.resource.data.get("reporterBarangay", "") == profile().barangay) && request.resource.data.get("reportedById", "") == request.auth.uid;
+      allow update: if (isBarangayAdmin() && resource.data.barangay == profile().barangay) ||
+        (isResident() && isActive() && resource.data.reportedById == request.auth.uid &&
+          (request.resource.data.status == resource.data.status ||
+            (resource.data.status == 'Needs Evidence' && request.resource.data.status == 'Under Review')) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'additionalEvidence', 'duplicateCount', 'lastEvidenceAt', 'updatedAt', 'updatedAtIso',
+            'status', 'duplicateOf', 'actionTaken', 'actionNote', 'statusHistory', 'isDuplicateUpdate'
+          ]));
       allow delete: if false;
     }
 

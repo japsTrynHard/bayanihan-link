@@ -1,3 +1,4 @@
+import { removeUndefined, toIso } from "../utils/firestoreData";
 import {
   doc,
   getDoc,
@@ -17,20 +18,9 @@ import {
   CLOUDINARY_FOLDERS,
   uploadImageToCloudinary,
 } from "./cloudinaryService";
-import {
-  resolveBarangayAdminCredential,
-  upsertBarangayAdminProfile,
-} from "./adminSeedService";
 
 const USERS_COLLECTION = "users";
 
-const toIso = (value) => {
-  if (!value) return "";
-  if (typeof value === "string") return value;
-  if (typeof value?.toDate === "function") return value.toDate().toISOString();
-  if (value instanceof Date) return value.toISOString();
-  return String(value);
-};
 
 const splitName = (name = "") => {
   const parts = String(name || "")
@@ -76,8 +66,8 @@ export const normalizeUserProfile = (uid, data = {}) => {
   const profilePicture = data.profilePicture || data.avatarUrl || "";
 
   return {
-    id: data.id || uid,
-    uid: data.uid || uid,
+    id: uid,
+    uid,
     name,
     firstName,
     lastName,
@@ -120,15 +110,8 @@ export const normalizeUserProfile = (uid, data = {}) => {
 };
 
 export const createUserProfile = async (uid, data = {}) => {
-  console.log("[createUserProfile] ===== CREATING USER PROFILE =====");
-  console.log("[createUserProfile] Input data:", data);
-  console.log("[createUserProfile] Barangay from input:", data.barangay);
 
-  if (!data.barangay) {
-    console.warn(
-      "[createUserProfile] WARNING: Barangay is missing from input data!",
-    );
-  }
+  if (!uid || !String(data.barangay || "").trim()) throw new Error("User ID and barangay are required.");
 
   const name = buildFullName(data);
   const derived = splitName(name);
@@ -145,7 +128,7 @@ export const createUserProfile = async (uid, data = {}) => {
       .toLowerCase(),
     phone: data.phone || "",
     barangay: String(data.barangay || "").trim(), // ENSURE BARANGAY IS STRING AND TRIMMED
-    role: data.role || "resident",
+    role: "resident",
     avatar: data.avatar || getInitials(name || data.email || "User"),
     avatarUrl: data.avatarUrl || data.profilePicture || "",
     avatarPublicId: data.avatarPublicId || "",
@@ -176,45 +159,8 @@ export const createUserProfile = async (uid, data = {}) => {
     updatedAt: serverTimestamp(),
   };
 
-  console.log(
-    "[createUserProfile] Profile object BEFORE Firestore save:",
-    JSON.stringify(profile, null, 2),
-  );
-  console.log(
-    "[createUserProfile] Barangay value in profile object:",
-    profile.barangay,
-  );
-  try {
-    console.log("[createUserProfile] Calling setDoc with merge=true...");
-    await setDoc(doc(db, USERS_COLLECTION, uid), profile, { merge: true });
-    console.log(
-      "[createUserProfile] ✓ Successfully saved profile to Firestore",
-    );
-    console.log(
-      "[createUserProfile] Barangay saved to Firestore:",
-      profile.barangay,
-    );
-  } catch (firestoreError) {
-    console.error(
-      "[createUserProfile] ✗ FIRESTORE ERROR saving profile:",
-      firestoreError,
-    );
-    console.error("[createUserProfile] Error code:", firestoreError.code);
-    console.error("[createUserProfile] Error message:", firestoreError.message);
-    throw firestoreError;
-  }
+  await setDoc(doc(db, USERS_COLLECTION, uid), profile);
   const normalized = normalizeUserProfile(uid, profile);
-  console.log(
-    "[createUserProfile] Normalized profile:",
-    JSON.stringify(normalized, null, 2),
-  );
-  console.log(
-    "[createUserProfile] Barangay in normalized profile:",
-    normalized.barangay,
-  );
-  console.log(
-    "[createUserProfile] ===== USER PROFILE CREATED SUCCESSFULLY =====",
-  );
   return normalized;
 };
 
@@ -230,118 +176,32 @@ export const ensureUserProfile = async (firebaseUser, fallbackData = {}) => {
   const existing = await getUserProfile(firebaseUser.uid);
   if (existing) return existing;
 
-  // If this auth user was just created, the registration flow may still be
-  // writing the Firestore profile. Wait briefly and re-check to avoid
-  // creating a placeholder profile that lacks `barangay` or proper name.
-  try {
-    const createdAt = firebaseUser?.metadata?.creationTime;
-    if (createdAt) {
-      const ageMs = Date.now() - new Date(createdAt).getTime();
-      if (ageMs >= 0 && ageMs < 5000) {
-        console.log(
-          "[ensureUserProfile] Freshly-created auth user detected; delaying profile creation to avoid race.",
-        );
-        await new Promise((r) => setTimeout(r, 1600));
-        const recheck = await getUserProfile(firebaseUser.uid);
-        if (recheck) return recheck;
-      }
-    }
-  } catch (err) {
-    // ignore timing errors
+  if (!String(fallbackData.barangay || "").trim()) {
+    const error = new Error("Your account profile is incomplete. Please contact your barangay administrator to restore it.");
+    error.code = "PROFILE_INCOMPLETE";
+    throw error;
   }
-
-  // If a user record already exists in Firestore for this email (for example
-  // seeded admin profiles), prefer that record to avoid creating a resident
-  // placeholder that would overwrite admin data.
-  try {
-    const email = String(firebaseUser.email || "")
-      .trim()
-      .toLowerCase();
-    if (email) {
-      const usersByEmailQuery = query(
-        collection(db, USERS_COLLECTION),
-        where("email", "==", email),
-      );
-      const snapshot = await getDocs(usersByEmailQuery);
-      if (!snapshot.empty) {
-        const docSnap = snapshot.docs[0];
-        return normalizeUserProfile(docSnap.id, docSnap.data());
-      }
-    }
-  } catch (queryErr) {
-    // ignore query errors and continue
-  }
-
-  // If this email is one of the seeded barangay admin credentials,
-  // upsert an admin profile to ensure `role: "barangay_admin"` is set.
-  try {
-    const adminCred = await resolveBarangayAdminCredential(
-      firebaseUser.email || "",
-    );
-    if (adminCred) {
-      try {
-        const adminProfile = await upsertBarangayAdminProfile(
-          firebaseUser.uid,
-          adminCred,
-        );
-        return normalizeUserProfile(firebaseUser.uid, adminProfile || {});
-      } catch (adminErr) {
-        console.warn(
-          "[ensureUserProfile] upsert admin failed, falling back:",
-          adminErr,
-        );
-      }
-    }
-  } catch (err) {
-    // ignore resolver failures
-  }
-
   return createUserProfile(firebaseUser.uid, {
+    ...fallbackData,
     name: firebaseUser.displayName || fallbackData.name || firebaseUser.email,
-    firstName:
-      fallbackData.firstName ||
-      splitName(firebaseUser.displayName || fallbackData.name || "").firstName,
-    lastName:
-      fallbackData.lastName ||
-      splitName(firebaseUser.displayName || fallbackData.name || "").lastName,
     email: firebaseUser.email || fallbackData.email,
-    phone: fallbackData.phone || "",
-    barangay: fallbackData.barangay || "",
-    role: fallbackData.role || "resident",
+    role: "resident",
     profilePicture: fallbackData.profilePicture || firebaseUser.photoURL || "",
-    bio: fallbackData.bio || "",
   });
 };
 
-const removeUndefined = (value) => {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => removeUndefined(item))
-      .filter((item) => item !== undefined);
-  }
-
-  if (value && typeof value === "object" && !(value instanceof Date)) {
-    return Object.entries(value).reduce((acc, [key, item]) => {
-      const cleaned = removeUndefined(item);
-      if (cleaned !== undefined) acc[key] = cleaned;
-      return acc;
-    }, {});
-  }
-
-  return value === undefined ? undefined : value;
-};
 
 export const updateUserProfile = async (uid, updates = {}) => {
   if (!uid) throw new Error("Missing user ID.");
 
   const existing = await getUserProfile(uid);
-  const safeUpdates = { ...updates };
-  delete safeUpdates.uid;
-  delete safeUpdates.id;
-  delete safeUpdates.role;
-  delete safeUpdates.status;
-  delete safeUpdates.warnings;
-  delete safeUpdates.createdAt;
+  if (!existing) throw new Error("Your account profile no longer exists. Please contact your barangay administrator.");
+  const editableFields = new Set([
+    "name", "firstName", "lastName", "email", "phone", "barangay", "avatar",
+    "avatarUrl", "avatarPublicId", "profilePicture", "bio", "emergencyContacts",
+    "notificationPreferences", "securityPreferences",
+  ]);
+  const safeUpdates = Object.fromEntries(Object.entries(updates).filter(([key]) => editableFields.has(key)));
 
   if (safeUpdates.name) {
     safeUpdates.avatar = safeUpdates.avatar || getInitials(safeUpdates.name);
@@ -379,20 +239,11 @@ export const updateUserProfile = async (uid, updates = {}) => {
   }
 
   const payload = removeUndefined({
-    ...(existing
-      ? {}
-      : {
-          uid,
-          id: uid,
-          role: updates.role || "resident",
-          status: updates.status || USER_STATUS.ACTIVE,
-          createdAt: serverTimestamp(),
-        }),
     ...safeUpdates,
     updatedAt: serverTimestamp(),
   });
 
-  await setDoc(doc(db, USERS_COLLECTION, uid), payload, { merge: true });
+  await updateDoc(doc(db, USERS_COLLECTION, uid), payload);
   return getUserProfile(uid);
 };
 

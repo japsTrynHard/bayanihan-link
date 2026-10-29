@@ -258,12 +258,14 @@ function AppointmentRequestPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError("");
     setSuccessMessage("");
 
-    if (!user) return;
+    if (!user || isSubmitting) return;
     if (activeDuplicate) {
       setSubmitError(`You already have an active ${currentService.name} appointment. Track or cancel it before creating another one.`);
       return;
@@ -274,7 +276,8 @@ function AppointmentRequestPage() {
     }
 
     try {
-      const newAppointment = createAppointment({
+      setIsSubmitting(true);
+      const newAppointment = await createAppointment({
         ...formData,
         serviceType: currentService.name,
         serviceName: currentService.name,
@@ -296,13 +299,15 @@ function AppointmentRequestPage() {
       resetForm();
     } catch (error) {
       setSubmitError(error.message || "Unable to submit appointment. Please try another slot.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleResidentAction = (appointment, action) => {
+  const handleResidentAction = async (appointment, action) => {
     try {
       if (action === "acceptReschedule") {
-        const updated = updateAppointment(
+        const updated = await updateAppointment(
           appointment.id,
           {
             status: APPOINTMENT_STATUS.APPROVED,
@@ -316,7 +321,7 @@ function AppointmentRequestPage() {
       }
 
       if (action === "cancel") {
-        const updated = updateAppointment(
+        const updated = await updateAppointment(
           appointment.id,
           {
             status: APPOINTMENT_STATUS.CANCELLED,
@@ -575,7 +580,7 @@ function AppointmentRequestPage() {
                       Next <ChevronRight size={16} />
                     </Button>
                   ) : (
-                    <Button type="submit" variant="success" disabled={!formData.purpose.trim() || !formData.preferredTime || Boolean(activeDuplicate)}>
+                    <Button type="submit" isLoading={isSubmitting} variant="success" disabled={!formData.purpose.trim() || !formData.preferredTime || Boolean(activeDuplicate)}>
                       <ShieldCheck size={16} /> Submit Appointment
                     </Button>
                   )}

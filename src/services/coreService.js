@@ -1,3 +1,4 @@
+import { removeUndefined, toIso } from "../utils/firestoreData";
 import {
   arrayUnion,
   collection,
@@ -10,6 +11,7 @@ import {
   setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import {
@@ -29,30 +31,7 @@ const COLLECTIONS = {
 
 const nowIso = () => new Date().toISOString();
 
-const toIso = (value) => {
-  if (!value) return "";
-  if (typeof value === "string") return value;
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value?.toDate === "function") return value.toDate().toISOString();
-  if (typeof value?.seconds === "number") return new Date(value.seconds * 1000).toISOString();
-  return String(value);
-};
 
-const removeUndefined = (value) => {
-  if (Array.isArray(value)) {
-    return value.map((item) => removeUndefined(item)).filter((item) => item !== undefined);
-  }
-
-  if (value && typeof value === "object" && !(value instanceof Date)) {
-    return Object.entries(value).reduce((acc, [key, item]) => {
-      const cleaned = removeUndefined(item);
-      if (cleaned !== undefined) acc[key] = cleaned;
-      return acc;
-    }, {});
-  }
-
-  return value === undefined ? undefined : value;
-};
 
 const normalizeDateFields = (data = {}) => {
   const createdAt = toIso(data.createdAt) || data.createdAtIso || nowIso();
@@ -81,15 +60,19 @@ const stripExactLocationFields = (data = {}) => {
 
 const getExactLocationPayload = (data = {}, id = data.id) => {
   const source = data.exactLocation || {};
-  const lat = Number(data.lat ?? data.latitude ?? source.lat ?? source.latitude);
-  const lng = Number(data.lng ?? data.longitude ?? source.lng ?? source.longitude);
+  const rawLat = data.lat ?? data.latitude ?? source.lat ?? source.latitude;
+  const rawLng = data.lng ?? data.longitude ?? source.lng ?? source.longitude;
+  if (rawLat == null || rawLng == null || String(rawLat).trim() === "" || String(rawLng).trim() === "") return null;
+  const lat = Number(rawLat);
+  const lng = Number(rawLng);
 
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
 
   return {
     id,
     emergencyId: id,
     barangay: data.barangay || "",
+    homeBarangay: data.homeBarangay || data.reporterHomeBarangay || "",
     authorId: data.authorId || data.userId || "",
     userId: data.userId || data.authorId || "",
     exactLocation: {
@@ -376,15 +359,18 @@ export const createEmergencyInFirestore = async (emergencyData = {}) => {
     true,
   );
 
-  await setDoc(doc(db, COLLECTIONS.emergencies, id), publicPayload, { merge: true });
+  const batch = writeBatch(db);
+  batch.set(doc(db, COLLECTIONS.emergencies, id), publicPayload, { merge: true });
 
   if (privateLocation) {
-    await setDoc(
+    batch.set(
       doc(db, COLLECTIONS.emergencyLocations, id),
       withWriteTimestamps(privateLocation, true),
       { merge: true },
     );
   }
+
+  await batch.commit();
 
   return getEmergencyFromFirestore(id);
 };

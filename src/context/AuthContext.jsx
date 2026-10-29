@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import {
   initializeStorage,
@@ -40,6 +41,9 @@ const sanitizeUser = (user) => {
 
 const normalizeSessionUser = (profile) => {
   if (!profile) return null;
+  if (profile.role && !["resident", "barangay_admin"].includes(profile.role)) {
+    throw new Error("Your account has an unsupported role. Please contact your barangay administrator.");
+  }
   const name = profile.name || profile.email || "Bayanihan User";
   const nameParts = String(name || "")
     .trim()
@@ -101,61 +105,12 @@ const upsertLocalUserMirror = (profile) => {
       item.email === sessionUser.email,
   );
 
-  const shouldPreserveAdminMirror =
-    existing &&
-    (existing.role === "barangay_admin" ||
-      sessionUser.role === "barangay_admin");
-  const preservedProfilePicture =
-    sessionUser.profilePicture ||
-    sessionUser.avatarUrl ||
-    existing?.profilePicture ||
-    existing?.avatarUrl ||
-    "";
-  const preservedName = sessionUser.name || existing?.name || "Bayanihan User";
-  const forceRole =
-    sessionUser.role === "barangay_admin" || existing?.role === "barangay_admin"
-      ? "barangay_admin"
-      : sessionUser.role;
-
   const mergedSessionUser = normalizeSessionUser({
-    ...(existing || {}),
     ...sessionUser,
-    ...(shouldPreserveAdminMirror
-      ? {
-          name: preservedName,
-          firstName: sessionUser.firstName || existing?.firstName || "",
-          lastName: sessionUser.lastName || existing?.lastName || "",
-          phone: sessionUser.phone || existing?.phone || "",
-          bio: sessionUser.bio || existing?.bio || "",
-          profilePicture: preservedProfilePicture,
-          avatarUrl: sessionUser.avatarUrl || preservedProfilePicture,
-          avatarPublicId:
-            sessionUser.avatarPublicId || existing?.avatarPublicId || "",
-          notificationPreferences: Object.keys(
-            sessionUser.notificationPreferences || {},
-          ).length
-            ? sessionUser.notificationPreferences
-            : existing?.notificationPreferences || {},
-        }
-      : {}),
-    id: sessionUser.id,
-    uid: sessionUser.uid,
-    role: forceRole,
-    joinedDate:
-      sessionUser.joinedDate ||
-      existing?.joinedDate ||
-      new Date().toISOString().split("T")[0],
+    // A cached role must never override the role supplied by Firestore.
+    role: sessionUser.role,
   });
-
-  const localUser = {
-    ...(existing || {}),
-    ...mergedSessionUser,
-    role:
-      sessionUser.role === "barangay_admin" ||
-      existing?.role === "barangay_admin"
-        ? "barangay_admin"
-        : mergedSessionUser.role,
-  };
+  const localUser = { ...mergedSessionUser };
 
   const nextUsers = existing
     ? users.map((item) =>
@@ -178,52 +133,43 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const authMutation = useRef(false);
+  const sessionVersion = useRef(0);
 
   // Restore Firebase session on mount
   useEffect(() => {
     initializeStorage();
+    let disposed = false;
     const unsubscribe = listenToAuthChanges(async (firebaseUser) => {
-      setIsLoading(true);
-
+      if (authMutation.current) return;
+      const version = ++sessionVersion.current;
+      const isCurrent = () => !disposed && version === sessionVersion.current && !authMutation.current;
       try {
         if (!firebaseUser) {
-          const savedUser = JSON.parse(
-            localStorage.getItem("currentUser") || "null",
-          );
-
-          if (
-            savedUser?.role === "barangay_admin" &&
-            savedUser?.isAdminFallbackSession
-          ) {
-            const sessionUser = upsertLocalUserMirror(savedUser);
-            setUser(sessionUser);
-            setIsAuthenticated(Boolean(sessionUser));
-          } else {
-            setUser(null);
-            setIsAuthenticated(false);
-            localStorage.removeItem("currentUser");
-          }
-
-          setIsLoading(false);
+          if (!isCurrent()) return;
+          setUser(null);
+          setIsAuthenticated(false);
+          localStorage.removeItem("currentUser");
           return;
         }
-
         const profile = await ensureUserProfile(firebaseUser);
+        if (!isCurrent()) return;
         const sessionUser = upsertLocalUserMirror(profile);
-
         setUser(sessionUser);
         setIsAuthenticated(Boolean(sessionUser));
       } catch (error) {
+        if (!isCurrent()) return;
         console.warn("Unable to restore Firebase session.", error);
         setUser(null);
         setIsAuthenticated(false);
         localStorage.removeItem("currentUser");
       } finally {
-        setIsLoading(false);
+        if (isCurrent()) setIsLoading(false);
       }
     });
+    return () => { disposed = true; ++sessionVersion.current; unsubscribe(); };
 
-    return () => unsubscribe();
   }, []);
 
   // Auto-refresh moderation state (warnings/suspensions)
@@ -254,11 +200,18 @@ export function AuthProvider({ children }) {
   // Live sync of user profile from Firestore (real-time)
   useEffect(() => {
     if (!user?.uid || user?.isAdminFallbackSession) return undefined;
-
+    let disposed = false;
+    const version = sessionVersion.current;
     const unsubscribe = subscribeUserProfile(
       user.uid,
       (profile) => {
-        if (!profile) return;
+        if (disposed || sessionVersion.current !== version || authMutation.current) return;
+        if (!profile || !["resident", "barangay_admin"].includes(profile.role || "resident")) {
+          setUser(null);
+          setIsAuthenticated(false);
+          localStorage.removeItem("currentUser");
+          return;
+        }
         const sessionUser = upsertLocalUserMirror(profile);
         setUser(sessionUser);
         setIsAuthenticated(Boolean(sessionUser));
@@ -271,32 +224,42 @@ export function AuthProvider({ children }) {
       },
     );
 
-    return () => unsubscribe?.();
+    return () => { disposed = true; unsubscribe?.(); };
   }, [user?.uid, user?.isAdminFallbackSession]);
 
   // Login function
   const login = useCallback(async (email, password) => {
-    setIsLoading(true);
+    authMutation.current = true;
+    const version = ++sessionVersion.current;
+    setIsSubmitting(true);
 
     try {
       const profile = await loginWithEmail(email, password);
+      if (version !== sessionVersion.current) return { error: "Sign in was cancelled. Please sign in again." };
       const sessionUser = upsertLocalUserMirror(profile);
       setUser(sessionUser);
       setIsAuthenticated(true);
       return sessionUser;
     } catch (error) {
-      setUser(null);
-      setIsAuthenticated(false);
-      localStorage.removeItem("currentUser");
+      if (version === sessionVersion.current) {
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem("currentUser");
+      }
       return { error: getFriendlyFirebaseError(error) };
     } finally {
-      setIsLoading(false);
+      if (version === sessionVersion.current) {
+        authMutation.current = false;
+        setIsSubmitting(false);
+      }
     }
   }, []);
 
   // Logout function
   const logout = useCallback(async () => {
-    setIsLoading(true);
+    ++sessionVersion.current;
+    authMutation.current = false;
+    setIsSubmitting(false);
     localStorage.removeItem("currentUser");
 
     try {
@@ -325,55 +288,28 @@ export function AuthProvider({ children }) {
 
   // Resident registration
   const register = useCallback(async (formData) => {
-    setIsLoading(true);
-    console.log(
-      "[AuthContext.register] ===== STARTING REGISTRATION FLOW =====",
-    );
-    console.log("[AuthContext.register] Form data:", formData);
-    console.log("[AuthContext.register] Barangay value:", formData.barangay);
-
+    authMutation.current = true;
+    const version = ++sessionVersion.current;
+    setIsSubmitting(true);
     try {
-      console.log("[AuthContext.register] Calling registerResidentAccount...");
-      const profile = await registerResidentAccount({
-        ...formData,
-        email: String(formData.email || "")
-          .trim()
-          .toLowerCase(),
-      });
-      console.log(
-        "[AuthContext.register] ★ registerResidentAccount returned profile",
-      );
-      console.log("[AuthContext.register] Profile object:", profile);
-      console.log(
-        "[AuthContext.register] Barangay in returned profile:",
-        profile.barangay,
-      );
-
-      console.log("[AuthContext.register] Calling upsertLocalUserMirror...");
+      const profile = await registerResidentAccount(formData);
+      if (version !== sessionVersion.current) return { error: "Registration session was cancelled. Please sign in to continue." };
       const sessionUser = upsertLocalUserMirror(profile);
-      console.log(
-        "[AuthContext.register] ★ upsertLocalUserMirror returned sessionUser",
-      );
-      console.log("[AuthContext.register] Session user object:", sessionUser);
-      console.log(
-        "[AuthContext.register] Barangay in session user:",
-        sessionUser.barangay,
-      );
-
-      console.log("[AuthContext.register] Setting user state...");
       setUser(sessionUser);
       setIsAuthenticated(true);
-      console.log("[AuthContext.register] ===== REGISTRATION COMPLETE =====");
       return sessionUser;
     } catch (error) {
-      console.error(
-        "[AuthContext.register] ✗ ERROR during registration:",
-        error,
-      );
-      console.error("[AuthContext.register] Error message:", error.message);
+      if (version === sessionVersion.current) {
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem("currentUser");
+      }
       return { error: getFriendlyFirebaseError(error) };
     } finally {
-      setIsLoading(false);
+      if (version === sessionVersion.current) {
+        authMutation.current = false;
+        setIsSubmitting(false);
+      }
     }
   }, []);
 
@@ -467,11 +403,8 @@ export function AuthProvider({ children }) {
         });
         const sessionUser = upsertLocalUserMirror({
           ...updatedProfile,
-          ...normalizedUpdates,
           uid: updatedProfile?.uid || user.uid || user.id,
           id: updatedProfile?.id || user.id || user.uid,
-          role: user.role,
-          status: user.status,
         });
 
         updateUser(
@@ -541,6 +474,7 @@ export function AuthProvider({ children }) {
         user,
         isAuthenticated,
         isLoading,
+        isSubmitting,
         login,
         loginAsAdminPreview,
         logout,

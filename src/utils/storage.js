@@ -259,8 +259,7 @@ export const normalizePost = (post = {}) => {
     comments: 0,
     interests: 0,
     images: [],
-    responses: [],
-    interestedUserIds: [],
+
     ...post,
     barangay: isLostFound ? incidentBarangay : isJobPost ? workBarangay : post.barangay,
     homeBarangay,
@@ -299,9 +298,11 @@ export const normalizeEmergency = (emergency = {}) => {
   const normalizedSeverity = String(emergency.severity || "High").toLowerCase() === "critical"
     ? "Critical"
     : "High";
-  const lat = Number(emergency.lat ?? emergency.latitude ?? emergency.exactLocation?.lat ?? emergency.locationPin?.lat);
-  const lng = Number(emergency.lng ?? emergency.longitude ?? emergency.exactLocation?.lng ?? emergency.locationPin?.lng);
-  const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng);
+  const rawLat = emergency.lat ?? emergency.latitude ?? emergency.exactLocation?.lat ?? emergency.locationPin?.lat;
+  const rawLng = emergency.lng ?? emergency.longitude ?? emergency.exactLocation?.lng ?? emergency.locationPin?.lng;
+  const lat = Number(rawLat);
+  const lng = Number(rawLng);
+  const hasCoordinates = rawLat != null && rawLng != null && String(rawLat).trim() !== "" && String(rawLng).trim() !== "" && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
   const rawLocation = typeof emergency.location === "string" ? emergency.location : "";
   const reporterHomeBarangay = emergency.reporterHomeBarangay || emergency.homeBarangay || emergency.author?.barangay || emergency.userBarangay || emergency.barangay || "";
   const incidentBarangay = emergency.incidentBarangay || emergency.handlerBarangay || emergency.locationBarangay || emergency.barangay || reporterHomeBarangay || "";
@@ -320,12 +321,7 @@ export const normalizeEmergency = (emergency = {}) => {
 
   return {
     responses: 0,
-    adminNotes: [],
-    statusHistory: [],
-    visibility: {
-      showToPublic: false,
-      exactPinAdminOnly: true,
-    },
+
     ...emergency,
     emergencyType,
     severity: normalizedSeverity,
@@ -391,13 +387,9 @@ export const normalizeAppointment = (appointment = {}) => {
   return {
     adminNotes: "",
     notes: "",
-    statusHistory: [],
-    appointmentLogs: [],
-    requirements: [],
+
     requirementsStatus: "Not checked",
-    checkInCode: "",
-    qrCodeValue: "",
-    referenceNumber: "",
+
     ...appointment,
     serviceId: appointment.serviceId || "",
     serviceType: appointment.serviceType || appointment.serviceName || "Barangay Clearance",
@@ -1635,8 +1627,6 @@ export const getReportTargetKeys = (report = {}) => {
   if (kind === "post") return reportKeySet(report.targetId, report.relatedPost, report.relatedPostId, report.postId, report.linkedPostId);
   return reportKeySet(report.targetId, report.relatedPost, report.relatedChat, report.targetUserId, report.reportedUserId);
 };
-
-
 
 export const findActiveDuplicateReport = (candidate = {}, reportList = getReports()) => {
   const candidateReporterKeys = getReportReporterKeys(candidate);

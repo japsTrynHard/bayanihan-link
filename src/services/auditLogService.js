@@ -1,3 +1,4 @@
+import { removeUndefined, toIso } from "../utils/firestoreData";
 import {
   collection,
   doc,
@@ -13,28 +14,7 @@ const AUDIT_LOGS_COLLECTION = "auditLogs";
 
 const nowIso = () => new Date().toISOString();
 
-const removeUndefined = (value) => {
-  if (Array.isArray(value)) return value.map(removeUndefined).filter((item) => item !== undefined);
 
-  if (value && typeof value === "object" && !(value instanceof Date)) {
-    return Object.entries(value).reduce((acc, [key, item]) => {
-      const cleaned = removeUndefined(item);
-      if (cleaned !== undefined) acc[key] = cleaned;
-      return acc;
-    }, {});
-  }
-
-  return value === undefined ? undefined : value;
-};
-
-const toIso = (value) => {
-  if (!value) return "";
-  if (typeof value === "string") return value;
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value?.toDate === "function") return value.toDate().toISOString();
-  if (typeof value?.seconds === "number") return new Date(value.seconds * 1000).toISOString();
-  return String(value);
-};
 
 export const normalizeAuditLog = (id, data = {}) => ({
   ...data,

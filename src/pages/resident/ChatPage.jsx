@@ -94,9 +94,6 @@ function getProfileMatches(profile = {}, directory = []) {
   const keys = new Set(
     getUserKeys(profile).map((key) => String(key).toLowerCase()),
   );
-  const name = String(profile.name || "")
-    .trim()
-    .toLowerCase();
   const email = String(profile.email || "")
     .trim()
     .toLowerCase();
@@ -112,14 +109,6 @@ function getProfileMatches(profile = {}, directory = []) {
       String(candidate.email || "")
         .trim()
         .toLowerCase() === email
-    )
-      return true;
-    if (
-      name &&
-      String(candidate.name || "")
-        .trim()
-        .toLowerCase() === name &&
-      (!profile.barangay || candidate.barangay === profile.barangay)
     )
       return true;
     return false;
@@ -455,7 +444,7 @@ function Chat() {
   }, [requestedChatId, selectedChatId, visibleChats]);
 
   const accountDirectory = useMemo(() => {
-    let localUsers = [];
+    let localUsers;
     try {
       localUsers = getUsers();
     } catch {
@@ -623,7 +612,7 @@ function Chat() {
 
       if (typeof addMessage !== "function")
         throw new Error("Chat service is not ready.");
-      addMessage(selectedChat.id, {
+      await addMessage(selectedChat.id, {
         id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         senderId: safeUser.id,
         senderName: safeUser.name,

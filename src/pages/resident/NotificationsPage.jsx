@@ -124,9 +124,9 @@ function Notifications() {
     navigate(getNotificationPath(notification, user));
   };
 
-  const handleChatNow = (notification) => {
+  const handleChatNow = async (notification) => {
     markNotificationRead(notification.id, user);
-    const chat = startChatFromNotification?.(user, notification);
+    const chat = await startChatFromNotification?.(user, notification)?.catch((error) => { window.alert(error.message || "Unable to open chat. Please try again."); return null; });
     if (chat?.id) {
       navigate(`/chat?chat=${chat.id}`);
     } else {

@@ -1,5 +1,6 @@
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
@@ -15,201 +16,65 @@ import {
   ensureUserProfile,
   getUserProfile,
 } from "./userService";
-import {
-  createBarangayAdminFallbackProfile,
-  ensureBarangayAdminAccount,
-  isValidBarangayAdminPassword,
-  resolveBarangayAdminCredential,
-  upsertBarangayAdminProfile,
-} from "./adminSeedService";
+import { resolveBarangayAdminCredential } from "./adminSeedService";
 
-export const listenToAuthChanges = (callback) => {
-  return onAuthStateChanged(auth, callback);
-};
+// Auth fires as soon as the Auth account is created. Hold observers until its
+// complete resident profile is saved, so no empty-barangay profile can win a race.
+let pendingRegistration = null;
+export const listenToAuthChanges = (callback) => onAuthStateChanged(auth, async (user) => {
+  if (user && pendingRegistration) await pendingRegistration;
+  if (auth.currentUser?.uid === user?.uid || (!auth.currentUser && !user)) callback(user);
+});
 
 export const registerResidentAccount = async (formData) => {
-  console.log(
-    "[registerResidentAccount] ===== STARTING RESIDENT ACCOUNT REGISTRATION =====",
-  );
-  console.log("[registerResidentAccount] Received formData:", formData);
-  console.log(
-    "[registerResidentAccount] Barangay in formData:",
-    formData.barangay,
-  );
-
-  if (!formData.barangay) {
-    console.error(
-      "[registerResidentAccount] ERROR: Barangay is missing or empty!",
-      {
-        barangay: formData.barangay,
-        type: typeof formData.barangay,
-        keys: Object.keys(formData),
-      },
-    );
-    throw new Error("Barangay is required for registration");
-  }
-
-  const email = String(formData.email || "")
-    .trim()
-    .toLowerCase();
+  const barangay = String(formData.barangay || "").trim();
+  if (!barangay) throw new Error("Barangay is required for registration.");
+  const email = String(formData.email || "").trim().toLowerCase();
   const firstName = String(formData.firstName || "").trim();
   const lastName = String(formData.lastName || "").trim();
-  const name = formData.name || `${firstName} ${lastName}`.trim();
-  const credential = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    formData.password,
-  );
-
-  console.log(
-    "[registerResidentAccount] Firebase user created with UID:",
-    credential.user.uid,
-  );
-
-  await updateFirebaseProfile(credential.user, {
-    displayName: name,
-    photoURL: formData.profilePicture || "",
-  });
-
-  const profileData = {
-    ...formData,
-    firstName,
-    lastName,
-    name,
-    email,
-    role: "resident",
-    profilePicture: formData.profilePicture || "",
-    barangay: formData.barangay, // EXPLICITLY SET BARANGAY
-  };
-  console.log(
-    "[registerResidentAccount] Profile data before createUserProfile:",
-    profileData,
-  );
-  console.log(
-    "[registerResidentAccount] Barangay value:",
-    profileData.barangay,
-  );
-
-  const profile = await createUserProfile(credential.user.uid, profileData);
-
-  console.log(
-    "[registerResidentAccount] Profile returned from createUserProfile:",
-    profile,
-  );
-  console.log(
-    "[registerResidentAccount] Barangay in returned profile:",
-    profile.barangay,
-  );
-  console.log(
-    "[registerResidentAccount] ===== RESIDENT ACCOUNT REGISTRATION COMPLETE =====",
-  );
-  return profile;
-};
-
-const RECOVERABLE_ADMIN_AUTH_CODES = [
-  "auth/invalid-credential",
-  "auth/wrong-password",
-  "auth/user-not-found",
-  "INVALID_LOGIN_CREDENTIALS",
-  "INVALID_PASSWORD",
-  "EMAIL_NOT_FOUND",
-  "OPERATION_NOT_ALLOWED",
-  "auth/operation-not-allowed",
-  "auth/network-request-failed",
-];
-
-const isRecoverableAdminAuthError = (error) => {
-  const code = String(error?.code || error?.message || "");
-  return RECOVERABLE_ADMIN_AUTH_CODES.some((item) => code.includes(item));
-};
-
-const buildSignedInAdminProfile = async (firebaseUser, adminCredential) => {
+  const name = String(formData.name || `${firstName} ${lastName}`).trim();
+  let finishRegistration;
+  pendingRegistration = new Promise((resolve) => { finishRegistration = resolve; });
+  let firebaseUser;
   try {
-    // Do not call createUserProfile here. Admin accounts already have seeded profiles,
-    // and createUserProfile rewrites profilePicture/name with the default credential data.
-    // upsertBarangayAdminProfile preserves the admin's saved photo, name, phone, bio,
-    // notification preferences, and status across logout/login.
-    return await upsertBarangayAdminProfile(firebaseUser.uid, adminCredential);
-  } catch (profileError) {
-    console.warn(
-      `Admin signed in, but Firestore profile sync failed for ${adminCredential.barangay}. Using local profile for now.`,
-      profileError,
-    );
-    return {
-      ...createBarangayAdminFallbackProfile(adminCredential),
-      uid: firebaseUser.uid,
-      id: firebaseUser.uid,
-      isAdminFallbackSession: false,
-    };
+    const credential = await createUserWithEmailAndPassword(auth, email, formData.password);
+    firebaseUser = credential.user;
+    await updateFirebaseProfile(firebaseUser, { displayName: name, photoURL: formData.profilePicture || "" });
+    return await createUserProfile(firebaseUser.uid, {
+      ...formData, firstName, lastName, name, email, barangay, role: "resident",
+    });
+  } catch (error) {
+    if (firebaseUser) {
+      try { await deleteUser(firebaseUser); }
+      catch { await signOut(auth); }
+    }
+    throw error;
+  } finally {
+    finishRegistration();
+    pendingRegistration = null;
   }
 };
 
-export const loginWithEmail = async (email, password) => {
-  const rawIdentifier = String(email || "").trim();
-  const adminCredential = await resolveBarangayAdminCredential(rawIdentifier);
-
-  if (adminCredential) {
-    const enteredPassword = String(password || "");
-    const defaultPasswordMatch = isValidBarangayAdminPassword(
-      adminCredential,
-      enteredPassword,
-    );
-
-    try {
-      // If the admin is still using the generated barangay password, make sure the Firebase account exists first.
-      // If the password was already changed in Firebase, skip seeding and try the entered password directly.
-      if (defaultPasswordMatch) {
-        try {
-          await ensureBarangayAdminAccount(adminCredential);
-        } catch (seedError) {
-          console.warn(
-            `Admin seed skipped or failed for ${adminCredential.barangay}. Login will still try Firebase/fallback.`,
-            seedError,
-          );
-        }
-      }
-
-      const credential = await signInWithEmailAndPassword(
-        auth,
-        adminCredential.email,
-        enteredPassword,
-      );
-
-      return buildSignedInAdminProfile(credential.user, adminCredential);
-    } catch (error) {
-      if (defaultPasswordMatch && isRecoverableAdminAuthError(error)) {
-        console.warn(
-          `Firebase admin account for ${adminCredential.barangay} could not be signed in. Using prepared admin session fallback.`,
-          error,
-        );
-        return createBarangayAdminFallbackProfile(adminCredential);
-      }
-
-      const wrongPasswordError = new Error(
-        "Wrong admin password for this barangay account.",
-      );
-      wrongPasswordError.code = "ADMIN_WRONG_PASSWORD";
-      throw wrongPasswordError;
-    }
-  }
-
-  if (!rawIdentifier.includes("@")) {
-    const error = new Error(
-      "No administrator account was found for those credentials.",
-    );
+export const loginWithEmail = async (identifier, password) => {
+  const rawIdentifier = String(identifier || "").trim();
+  // Usernames map to an email only. Authentication and role assignment always
+  // come from Firebase, including when a default password has been changed.
+  const adminCredential = rawIdentifier.includes("@")
+    ? null
+    : await resolveBarangayAdminCredential(rawIdentifier);
+  const email = adminCredential?.email || rawIdentifier.toLowerCase();
+  if (!email.includes("@")) {
+    const error = new Error("No administrator account was found for those credentials.");
     error.code = "ADMIN_USERNAME_NOT_FOUND";
     throw error;
   }
-
-  const loginEmail = rawIdentifier.toLowerCase();
-
-  const credential = await signInWithEmailAndPassword(
-    auth,
-    loginEmail,
-    password,
-  );
-
-  return ensureUserProfile(credential.user);
+  const credential = await signInWithEmailAndPassword(auth, email, password);
+  try {
+    return await ensureUserProfile(credential.user);
+  } catch (error) {
+    await signOut(auth);
+    throw error;
+  }
 };
 
 export const logoutFirebaseUser = () => signOut(auth);
@@ -223,7 +88,7 @@ export const updateFirebaseAuthProfile = async ({ name, profilePicture }) => {
   if (!auth.currentUser) return;
   await updateFirebaseProfile(auth.currentUser, {
     displayName: name || auth.currentUser.displayName || "",
-    photoURL: profilePicture || auth.currentUser.photoURL || "",
+    photoURL: profilePicture ?? auth.currentUser.photoURL ?? "",
   });
 };
 

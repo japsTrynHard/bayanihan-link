@@ -211,7 +211,7 @@ function MyPostsPage() {
     { value: "appointments", label: "Appointments", icon: CalendarDays },
   ];
 
-  const handleChatResponse = (item, response) => {
+  const handleChatResponse = async (item, response) => {
     if (!user?.id || !response?.userId) return;
     const otherUser = {
       id: response.userId,
@@ -220,12 +220,12 @@ function MyPostsPage() {
       barangay: response.barangay || item.barangay || "",
       role: "resident",
     };
-    const chat = getOrCreateChat?.(user, otherUser, {
+    const chat = await getOrCreateChat?.(user, otherUser, {
       relatedPostId: item.rawId,
       relatedPostTitle: item.title,
       relatedPostType: item.typeLabel,
       source: "my_posts_owner_monitor",
-    });
+    })?.catch((error) => { window.alert(error.message || "Unable to open chat. Please try again."); return null; });
     if (chat?.id) {
       navigate(`/chat?chat=${chat.id}`);
     } else {

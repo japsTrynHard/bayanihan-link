@@ -338,7 +338,7 @@ function AppointmentManagementPage() {
     setDecisionForm({ adminNotes: "", preferredDate: today, preferredTime: "" });
   };
 
-  const handleDecisionSubmit = (e) => {
+  const handleDecisionSubmit = async (e) => {
     e.preventDefault();
     if (!actionState || actionSubmitting) return;
 
@@ -380,7 +380,7 @@ function AppointmentManagementPage() {
 
     try {
       setActionSubmitting(true);
-      const updated = updateAppointment(liveAppointment.id, payload, user);
+      const updated = await updateAppointment(liveAppointment.id, payload, user);
       setSelectedAppointmentId(updated?.id || liveAppointment.id);
       setNotice(`${config.button} successful. Resident notification was sent once.`);
       closeAction();

@@ -1,3 +1,4 @@
+import { removeUndefined, toIso } from "../utils/firestoreData";
 import {
   arrayUnion,
   collection,
@@ -6,6 +7,7 @@ import {
   limit,
   onSnapshot,
   query,
+  runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -22,28 +24,7 @@ const CHATS_COLLECTION = "chats";
 
 const nowIso = () => new Date().toISOString();
 
-const toIso = (value) => {
-  if (!value) return "";
-  if (typeof value === "string") return value;
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value?.toDate === "function") return value.toDate().toISOString();
-  if (typeof value?.seconds === "number")
-    return new Date(value.seconds * 1000).toISOString();
-  return String(value);
-};
 
-const removeUndefined = (value) => {
-  if (Array.isArray(value))
-    return value.map(removeUndefined).filter((item) => item !== undefined);
-  if (value && typeof value === "object" && !(value instanceof Date)) {
-    return Object.entries(value).reduce((acc, [key, item]) => {
-      const cleaned = removeUndefined(item);
-      if (cleaned !== undefined) acc[key] = cleaned;
-      return acc;
-    }, {});
-  }
-  return value === undefined ? undefined : value;
-};
 
 const publicUser = (user = {}) => ({
   id: user.id || user.uid || "",
@@ -78,7 +59,7 @@ const uniqueList = (...groups) => [
 ];
 
 const getUserKeys = (user = {}) =>
-  uniqueList(user.id, user.uid, user.userId, user.email, user.name).filter(
+  uniqueList(user.id, user.uid, user.userId, user.email).filter(
     Boolean,
   );
 
@@ -105,6 +86,7 @@ export const normalizeFirestoreChat = (id, data = {}) => {
   });
 
   return {
+    ...data,
     messages: sortedMessages,
     participants: Array.isArray(data.participants) ? data.participants : [],
     participantKeys: Array.isArray(data.participantKeys)
@@ -114,7 +96,6 @@ export const normalizeFirestoreChat = (id, data = {}) => {
       ? data.participantProfiles
       : [],
     relatedPosts: Array.isArray(data.relatedPosts) ? data.relatedPosts : [],
-    ...data,
     id,
     uid: id,
     createdAt,
@@ -155,31 +136,16 @@ export const subscribeChatsForUser = (currentUser, callback, onError) => {
     return () => {};
   }
 
-  const merged = new Map();
-  const emit = () => callback(sortChats([...merged.values()]));
+  const sources = new Map();
   const unsubscribers = [];
-
-  const makeListener = (chatQuery) =>
-    onSnapshot(
-      chatQuery,
-      (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          const chat = normalizeFirestoreChat(change.doc.id, change.doc.data());
-          if (chatContainsUser(chat, currentUser)) {
-            if (change.type === "removed") merged.delete(change.doc.id);
-            else merged.set(change.doc.id, chat);
-          }
-        });
-        emit();
-      },
-      (error) => {
-        console.warn(
-          "Firestore chat listener failed (Rules restriction):",
-          error.message,
-        );
-        if (onError) onError(error);
-      },
-    );
+  const makeListener = (chatQuery) => onSnapshot(chatQuery, (snapshot) => {
+    sources.set(chatQuery, snapshot.docs.map((item) => normalizeFirestoreChat(item.id, item.data())));
+    const merged = new Map();
+    sources.forEach((records) => records.forEach((chat) => {
+      if (chatContainsUser(chat, currentUser)) merged.set(chat.id, chat);
+    }));
+    callback(sortChats([...merged.values()]));
+  }, (error) => { onError?.(error); });
 
   // Safe Query 1: by exact UID to satisfy rules
   if (uid) {
@@ -202,132 +168,42 @@ export const subscribeChatsForUser = (currentUser, callback, onError) => {
   return () => unsubscribers.forEach((unsub) => unsub?.());
 };
 
-export const createOrGetChatInFirestore = async ({
-  currentUser,
-  otherUser,
-  context = {},
-}) => {
-  const currentUserId = currentUser.uid || currentUser.id || "";
-  const otherUserId = otherUser.uid || otherUser.id || "";
-  const email = currentUser.email;
-
-  if (!currentUserId || !otherUserId) {
-    throw new Error(
-      "Cannot create chat: missing user ID for one or both participants.",
-    );
-  }
-
-  let existingDoc = null;
-
-  try {
-    const queries = [];
-    if (currentUserId)
-      queries.push(
-        getDocs(
-          query(
-            collection(db, CHATS_COLLECTION),
-            where("participants", "array-contains", currentUserId),
-          ),
-        ),
-      );
-    if (email)
-      queries.push(
-        getDocs(
-          query(
-            collection(db, CHATS_COLLECTION),
-            where("participantKeys", "array-contains", email),
-          ),
-        ),
-      );
-
-    const snapshots = await Promise.all(queries);
-    const candidateDocs = snapshots.flatMap((snap) => snap.docs);
-
-    const currentKeys = getUserKeys(currentUser);
-    const otherKeys = getUserKeys(otherUser);
-    const seenDocs = new Set();
-
-    existingDoc = candidateDocs.find((item) => {
-      if (seenDocs.has(item.id)) return false;
-      seenDocs.add(item.id);
-      const chat = normalizeFirestoreChat(item.id, item.data());
-      const keys = new Set(
-        uniqueList(
-          chat.participants || [],
-          chat.participantKeys || [],
-          (chat.participantProfiles || []).flatMap(getUserKeys),
-        ),
-      );
-      return (
-        currentKeys.some((key) => keys.has(key)) &&
-        otherKeys.some((key) => keys.has(key))
-      );
-    });
-  } catch (error) {
-    console.warn(
-      "Error querying existing chats. Proceeding to create new chat.",
-      error.message,
-    );
-  }
-
-  const relatedPost = buildRelatedPost(context);
-
-  if (existingDoc) {
-    const chat = normalizeFirestoreChat(existingDoc.id, existingDoc.data());
-    const updates = { updatedAt: serverTimestamp(), updatedAtIso: nowIso() };
-
-    if (relatedPost) {
-      updates.relatedPostId = relatedPost.id;
-      updates.relatedPostTitle = relatedPost.title;
-      updates.relatedPostType = relatedPost.type;
-      updates.lastContextAt = nowIso();
-      const existingPosts = Array.isArray(chat.relatedPosts)
-        ? chat.relatedPosts
-        : [];
-      updates.relatedPosts = existingPosts.some(
-        (item) => item.id === relatedPost.id,
-      )
-        ? existingPosts.map((item) =>
-            item.id === relatedPost.id ? { ...item, ...relatedPost } : item,
-          )
-        : [relatedPost, ...existingPosts].slice(0, 5);
-    }
-    await updateDoc(
-      doc(db, CHATS_COLLECTION, chat.id),
-      removeUndefined(updates),
-    );
-    return normalizeFirestoreChat(chat.id, { ...chat, ...updates });
-  }
-
-  const chatId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const createdAtIso = nowIso();
-  const payload = removeUndefined({
-    id: chatId,
-    participants: [currentUserId, otherUserId],
-    participantKeys: uniqueList(
-      getUserKeys(currentUser),
-      getUserKeys(otherUser),
-    ),
-    participantProfiles: [publicUser(currentUser), publicUser(otherUser)],
-    relatedPostId: relatedPost?.id || "",
-    relatedPostTitle: relatedPost?.title || "",
-    relatedPostType: relatedPost?.type || "",
-    relatedPosts: relatedPost ? [relatedPost] : [],
-    lastMessage: relatedPost
-      ? `Conversation started about ${relatedPost.title}`
-      : "Conversation started",
-    lastMessageAt: serverTimestamp(),
-    lastMessageAtIso: createdAtIso,
-    lastMessageTime: displayDate(createdAtIso),
-    messages: [],
-    createdAt: serverTimestamp(),
-    createdAtIso,
-    updatedAt: serverTimestamp(),
-    updatedAtIso: createdAtIso,
+export const createOrGetChatInFirestore = async ({ currentUser, otherUser, context = {} }) => {
+  const currentId = currentUser?.uid || currentUser?.id;
+  const otherId = otherUser?.uid || otherUser?.id;
+  if (!currentId || !otherId || currentId === otherId) throw new Error("Two different account IDs are required to start a chat.");
+  const snapshot = await getDocs(query(collection(db, CHATS_COLLECTION), where("participants", "array-contains", currentId)));
+  const existing = snapshot.docs.find((item) => {
+    const chat = normalizeFirestoreChat(item.id, item.data());
+    return chatContainsUser(chat, currentUser) && chatContainsUser(chat, otherUser);
   });
-
-  await setDoc(doc(db, CHATS_COLLECTION, chatId), payload, { merge: true });
-  return normalizeFirestoreChat(chatId, payload);
+  // Both participants choose the same ID even when they open a chat at once.
+  const chatId = existing?.id || "chat-" + encodeURIComponent(JSON.stringify([currentId, otherId].sort()));
+  const chatRef = doc(db, CHATS_COLLECTION, chatId);
+  const relatedPost = buildRelatedPost(context);
+  return runTransaction(db, async (transaction) => {
+    const latest = await transaction.get(chatRef);
+    const stamp = nowIso();
+    const payload = latest.exists() ? latest.data() : {
+      id: chatId, participants: [currentId, otherId],
+      participantKeys: uniqueList(getUserKeys(currentUser), getUserKeys(otherUser)),
+      participantProfiles: [publicUser(currentUser), publicUser(otherUser)],
+      messages: [], relatedPosts: [],
+      lastMessage: relatedPost ? "Conversation started about " + relatedPost.title : "Conversation started",
+      lastMessageAt: serverTimestamp(), lastMessageAtIso: stamp,
+      createdAt: serverTimestamp(), createdAtIso: stamp,
+    };
+    const updates = { updatedAt: serverTimestamp(), updatedAtIso: stamp };
+    if (relatedPost) {
+      Object.assign(updates, {
+        relatedPostId: relatedPost.id, relatedPostTitle: relatedPost.title,
+        relatedPostType: relatedPost.type, lastContextAt: stamp,
+        relatedPosts: [relatedPost, ...(payload.relatedPosts || []).filter((item) => item.id !== relatedPost.id)].slice(0, 5),
+      });
+    }
+    transaction.set(chatRef, removeUndefined(latest.exists() ? updates : { ...payload, ...updates }), { merge: true });
+    return normalizeFirestoreChat(chatId, { ...payload, ...updates });
+  });
 };
 
 export const createChatInFirestore = async (chatData = {}) => {
@@ -390,15 +266,7 @@ export const addMessageToChatInFirestore = async (
     updatedAtIso: createdAtIso,
   };
 
-  // Prevent NOT_FOUND errors and satisfy Security Rules during race conditions
-  if (currentChat?.participants) {
-    payload.participants = currentChat.participants;
-    payload.participantKeys = currentChat.participantKeys || [];
-    payload.participantProfiles = currentChat.participantProfiles || [];
-  }
-
-  // Changed updateDoc to setDoc with merge: true to avoid document missing errors
-  await setDoc(doc(db, CHATS_COLLECTION, chatId), payload, { merge: true });
+  await updateDoc(doc(db, CHATS_COLLECTION, chatId), payload);
 
   return nextMessage;
 };
@@ -416,28 +284,23 @@ export const sendImageMessageToChatInFirestore = async (
   });
 };
 
-export const markChatReadInFirestore = async (
-  chatId,
-  userId,
-  currentChat = null,
-) => {
+const transformChatMessages = (chatId, transform) => runTransaction(db, async (transaction) => {
+  const chatRef = doc(db, CHATS_COLLECTION, chatId);
+  const snapshot = await transaction.get(chatRef);
+  if (!snapshot.exists()) throw new Error("Conversation no longer exists.");
+  const chat = normalizeFirestoreChat(snapshot.id, snapshot.data());
+  const messages = transform(chat.messages);
+  transaction.update(chatRef, { messages: removeUndefined(messages), updatedAt: serverTimestamp(), updatedAtIso: nowIso() });
+  return normalizeFirestoreChat(chatId, { ...chat, messages });
+});
+
+export const markChatReadInFirestore = async (chatId, userId, currentChat = null) => {
   if (!chatId || !userId || !currentChat) return null;
-  const messages = (currentChat.messages || []).map((message) => ({
-    ...message,
-    readBy: Array.from(new Set([...(message.readBy || []), userId])),
-  }));
-
-  await setDoc(
-    doc(db, CHATS_COLLECTION, chatId),
-    {
-      messages,
-      updatedAt: serverTimestamp(),
-      updatedAtIso: nowIso(),
-    },
-    { merge: true },
-  );
-
-  return normalizeFirestoreChat(chatId, { ...currentChat, messages });
+  // Acknowledge only messages actually displayed, not messages arriving later.
+  const seenIds = new Set((currentChat.messages || []).map((message) => message.id));
+  return transformChatMessages(chatId, (messages) => messages.map((message) => seenIds.has(message.id)
+    ? { ...message, readBy: [...new Set([...(message.readBy || []), userId])] }
+    : message));
 };
 
 export const updateChatInFirestore = async (chatId, updates = {}) => {
@@ -458,20 +321,8 @@ export const updateChatMessageInFirestore = async (
   updater,
 ) => {
   if (!chatId || !currentChat || !messageId) return null;
-  const messages = (currentChat.messages || []).map((message) => {
+  return transformChatMessages(chatId, (messages) => messages.map((message) => {
     if (message.id !== messageId) return message;
-    return typeof updater === "function"
-      ? updater(message)
-      : { ...message, ...updater };
-  });
-  await setDoc(
-    doc(db, CHATS_COLLECTION, chatId),
-    {
-      messages,
-      updatedAt: serverTimestamp(),
-      updatedAtIso: nowIso(),
-    },
-    { merge: true },
-  );
-  return normalizeFirestoreChat(chatId, { ...currentChat, messages });
+    return typeof updater === "function" ? updater(message) : { ...message, ...updater };
+  }));
 };

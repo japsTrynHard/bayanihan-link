@@ -9,7 +9,7 @@ import { useAuth } from "../../context/AuthContext";
 import "../../styles/pages/Auth.css";
 
 function Login() {
-  const { login, isLoading } = useAuth();
+  const { login, isSubmitting: isLoading } = useAuth();
   const navigate = useNavigate();
   // useState: Controls kung makikita o naka-hide ang password field.
   const [showPassword, setShowPassword] = useState(false);
